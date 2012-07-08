@@ -42,8 +42,6 @@ import org.terasology.logic.LocalPlayer;
 import org.terasology.logic.manager.AssetManager;
 import org.terasology.logic.manager.GUIManager;
 import org.terasology.logic.manager.PathManager;
-import org.terasology.logic.mod.Mod;
-import org.terasology.logic.mod.ModManager;
 import org.terasology.logic.world.Chunk;
 import org.terasology.logic.world.WorldProvider;
 import org.terasology.math.Vector3i;
@@ -109,12 +107,6 @@ public class StateSinglePlayer implements GameState {
     }
 
     public void init(GameEngine engine) {
-        // TODO: Change to better mod support, should be enabled via config
-        ModManager modManager = new ModManager();
-        for (Mod mod : modManager.getMods()) {
-            mod.setEnabled(true);
-        }
-        modManager.saveModSelectionToConfig();
         cacheTextures();
 
         entityManager = new EntitySystemBuilder().build();
