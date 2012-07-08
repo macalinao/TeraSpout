@@ -15,7 +15,6 @@ import org.terasology.game.CoreRegistry;
 import org.terasology.logic.LocalPlayer;
 import org.terasology.logic.manager.Config;
 import org.terasology.logic.manager.GUIManager;
-import org.terasology.mods.miniions.events.ToggleMinionModeButton;
 
 import java.util.List;
 import java.util.Map;
@@ -319,9 +318,6 @@ public class InputSystem implements EventHandlerSystem {
             registerBindButton(inventorySlotBind, "Inventory Slot " + (i + 1), new ToolbarSlotButton(i));
             linkBindButtonToKey(Keyboard.KEY_1 + i, inventorySlotBind);
         }
-
-        registerBindButton(ToggleMinionModeButton.ID, "Toggle Minion Mode", new ToggleMinionModeButton()).setMode(BindableButtonImpl.ActivateMode.PRESS);
-        linkBindButtonToKey(Keyboard.KEY_X, ToggleMinionModeButton.ID);
     }
 
 }

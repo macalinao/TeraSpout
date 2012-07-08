@@ -22,10 +22,6 @@ import org.terasology.game.GameEngine;
 import org.terasology.game.Timer;
 import org.terasology.logic.LocalPlayer;
 import org.terasology.logic.manager.Config;
-import org.terasology.mods.miniions.components.MinionComponent;
-import org.terasology.mods.miniions.events.MinionMessageEvent;
-import org.terasology.mods.miniions.rendering.gui.components.UIMessageQueue;
-import org.terasology.mods.miniions.rendering.gui.components.UIMinionbar;
 import org.terasology.rendering.gui.components.*;
 import org.terasology.rendering.gui.framework.UIDisplayWindow;
 import org.terasology.rendering.primitives.ChunkTessellator;
@@ -50,8 +46,6 @@ public class UIHeadsUpDisplay extends UIDisplayWindow implements EventHandlerSys
     private final UIText _debugLine4;
 
     private final UIToolbar _toolbar;
-    private final UIMinionbar _minionbar;
-    private final UIMessageQueue _messagequeue;
     private final UIHealthBar _healthBar;
     private final UIBuff _buffBar;
 
@@ -76,14 +70,6 @@ public class UIHeadsUpDisplay extends UIDisplayWindow implements EventHandlerSys
         _toolbar = new UIToolbar();
         _toolbar.setVisible(true);
         addDisplayElement(_toolbar);
-
-        _minionbar = new UIMinionbar();
-        _minionbar.setVisible(true);
-        addDisplayElement(_minionbar);
-
-        _messagequeue = new UIMessageQueue();
-        _messagequeue.setVisible(true);
-        addDisplayElement(_messagequeue);
 
         _healthBar = new UIHealthBar();
         _healthBar.setVisible(true);
@@ -134,10 +120,5 @@ public class UIHeadsUpDisplay extends UIDisplayWindow implements EventHandlerSys
 
     @Override
     public void shutdown() {
-    }
-
-    @ReceiveEvent(components = {MinionComponent.class})
-    public void onMessageReceived(MinionMessageEvent event, EntityRef entityref) {
-        _messagequeue.addIconToQueue(event.getMinionMessage());
     }
 }

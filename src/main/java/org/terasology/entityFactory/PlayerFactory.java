@@ -12,8 +12,6 @@ import org.terasology.events.inventory.ReceiveItemEvent;
 import org.terasology.game.CoreRegistry;
 import org.terasology.logic.manager.AssetManager;
 import org.terasology.model.blocks.management.BlockManager;
-import org.terasology.mods.miniions.components.MinionBarComponent;
-import org.terasology.mods.miniions.components.MinionControllerComponent;
 
 import javax.vecmath.Vector3f;
 
@@ -57,8 +55,6 @@ public class PlayerFactory {
         sounds.footstepSounds.add(AssetManager.load(new AssetUri(AssetType.SOUND, "engine:FootGrass5"), Sound.class));
         player.addComponent(new LocalPlayerComponent());
         player.addComponent(new InventoryComponent(36));
-        player.addComponent(new MinionBarComponent(9));
-        player.addComponent(new MinionControllerComponent());
 
         player.send(new ReceiveItemEvent(blockFactory.newInstance(BlockManager.getInstance().getBlockFamily("Companion"), 16)));
         player.send(new ReceiveItemEvent(blockFactory.newInstance(BlockManager.getInstance().getBlockFamily("Torch"), 99)));
