@@ -3,6 +3,7 @@ package org.terasology.rendering.gui.dialogs;
 import javax.vecmath.Vector2f;
 
 import org.newdawn.slick.Color;
+import org.spout.api.Spout;
 import org.terasology.game.CoreRegistry;
 import org.terasology.game.TerasologyEngine;
 import org.terasology.game.modes.StateSinglePlayer;
@@ -79,7 +80,7 @@ public class UIDialogCreateNewWorld extends UIDialogBox {
                 } else {
                     Config.getInstance().setWorldTitle(getWorldName());
                 }
-                CoreRegistry.get(TerasologyEngine.class).changeState(new StateSinglePlayer(Config.getInstance().getWorldTitle(), Config.getInstance().getDefaultSeed()));
+                CoreRegistry.get(TerasologyEngine.class).changeState(new StateSinglePlayer((TerasologyEngine)(Spout.getEngine())));
             }
         });
 

@@ -16,30 +16,23 @@
 
 package org.terasology.game;
 
-import com.google.common.collect.Lists;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.LWJGLUtil;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GLContext;
-import org.spout.engine.SpoutClient;
-import org.terasology.asset.AssetType;
-import org.terasology.asset.AssetUri;
-import org.terasology.asset.loaders.*;
-import org.terasology.asset.sources.ClasspathSource;
-import org.terasology.game.modes.GameState;
-import org.terasology.logic.manager.*;
-import org.terasology.model.blocks.management.BlockManager;
-import org.terasology.model.blocks.management.BlockManifestor;
-import org.terasology.model.shapes.BlockShapeManager;
-import org.terasology.performanceMonitor.PerformanceMonitor;
+import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.GL_LEQUAL;
+import static org.lwjgl.opengl.GL11.GL_NORMALIZE;
+import static org.lwjgl.opengl.GL11.glDepthFunc;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glViewport;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -49,7 +42,37 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import static org.lwjgl.opengl.GL11.*;
+import org.lwjgl.LWJGLException;
+import org.lwjgl.LWJGLUtil;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GLContext;
+import org.spout.api.gamestate.GameState;
+import org.spout.engine.SpoutClient;
+import org.terasology.asset.AssetType;
+import org.terasology.asset.AssetUri;
+import org.terasology.asset.loaders.GLSLShaderLoader;
+import org.terasology.asset.loaders.MaterialLoader;
+import org.terasology.asset.loaders.ObjMeshLoader;
+import org.terasology.asset.loaders.OggSoundLoader;
+import org.terasology.asset.loaders.OggStreamingSoundLoader;
+import org.terasology.asset.loaders.PNGTextureLoader;
+import org.terasology.asset.sources.ClasspathSource;
+import org.terasology.logic.manager.AssetManager;
+import org.terasology.logic.manager.AudioManager;
+import org.terasology.logic.manager.Config;
+import org.terasology.logic.manager.FontManager;
+import org.terasology.logic.manager.GroovyManager;
+import org.terasology.logic.manager.PathManager;
+import org.terasology.logic.manager.ShaderManager;
+import org.terasology.logic.manager.VertexBufferObjectManager;
+import org.terasology.model.blocks.management.BlockManager;
+import org.terasology.model.blocks.management.BlockManifestor;
+import org.terasology.model.shapes.BlockShapeManager;
+import org.terasology.performanceMonitor.PerformanceMonitor;
+
+import com.google.common.collect.Lists;
 
 /**
  * @author Immortius
@@ -410,18 +433,10 @@ public class TerasologyEngine extends SpoutClient {
 
             timer.tick();
 
-            PerformanceMonitor.startActivity("Main Update");
-            state.update(timer.getDelta());
-            PerformanceMonitor.endActivity();
-
             PerformanceMonitor.startActivity("Render");
-            state.render();
+            state.onRender(timer.getDelta());
             Display.update();
             Display.sync(60);
-            PerformanceMonitor.endActivity();
-
-            PerformanceMonitor.startActivity("Input");
-            state.handleInput(timer.getDelta());
             PerformanceMonitor.endActivity();
 
             PerformanceMonitor.startActivity("Audio");
@@ -453,20 +468,19 @@ public class TerasologyEngine extends SpoutClient {
 
     private void doPopState() {
         GameState oldState = stateStack.pop();
-        oldState.deactivate();
-        oldState.dispose();
+        oldState.unloadResources();
         if (!stateStack.isEmpty()) {
-            stateStack.peek().activate();
+            stateStack.peek().loadResources();
         }
     }
 
     private void doPushState(GameState newState) {
         if (!stateStack.isEmpty()) {
-            stateStack.peek().deactivate();
+            stateStack.peek().unloadResources();
         }
         stateStack.push(newState);
-        newState.init(this);
-        newState.activate();
+        newState.initialize();
+        newState.loadResources();
     }
 
     private interface StateChangeFunction {

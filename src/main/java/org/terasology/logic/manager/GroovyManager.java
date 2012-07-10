@@ -217,14 +217,6 @@ public class GroovyManager {
             }
         }
 
-        public void gotoWorld(String title) {
-            CoreRegistry.get(TerasologyEngine.class).changeState(new StateSinglePlayer(title));
-        }
-
-        public void gotoWorld(String title, String seed) {
-            CoreRegistry.get(TerasologyEngine.class).changeState(new StateSinglePlayer(title, seed));
-        }
-
         public void dumpEntities() throws IOException {
             CoreRegistry.get(WorldPersister.class).save(new File(PathManager.getInstance().getDataPath(), "entityDump.txt"), WorldPersister.SaveFormat.JSON);
         }

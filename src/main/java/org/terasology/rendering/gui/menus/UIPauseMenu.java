@@ -18,6 +18,7 @@ package org.terasology.rendering.gui.menus;
 import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3f;
 
+import org.spout.api.Spout;
 import org.terasology.components.CharacterMovementComponent;
 import org.terasology.components.HealthComponent;
 import org.terasology.components.LocalPlayerComponent;
@@ -114,7 +115,7 @@ public class UIPauseMenu extends UIDisplayWindow {
         _mainMenuButton.addClickListener(new IClickListener() {
             public void clicked(UIDisplayElement element) {
                 setVisible(false);
-                CoreRegistry.get(TerasologyEngine.class).changeState(new StateMainMenu());
+                CoreRegistry.get(TerasologyEngine.class).changeState(new StateMainMenu((TerasologyEngine) Spout.getEngine()));
             }
         });
 

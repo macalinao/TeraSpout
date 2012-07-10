@@ -22,6 +22,7 @@ import static org.lwjgl.opengl.GL11.glLoadIdentity;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.spout.api.gamestate.GameState;
 import org.terasology.game.TerasologyEngine;
 import org.terasology.logic.manager.AudioManager;
 import org.terasology.logic.manager.Config;
@@ -45,7 +46,7 @@ import org.terasology.rendering.gui.menus.UISelectWorldMenu;
  * @author Anton Kireev <adeon.k87@gmail.com>
  * @version 0.1
  */
-public class StateMainMenu implements GameState {
+public class StateMainMenu extends GameState {
     /* SCREENS */
     private UIMainMenu _mainMenu;
     private UIConfigMenu _configMenu;
@@ -53,10 +54,12 @@ public class StateMainMenu implements GameState {
 
     private TerasologyEngine _gameInstance = null;
 
+    public StateMainMenu(TerasologyEngine gameEngine) {
+    	_gameInstance = gameEngine;
+    }
+    
     @Override
-    public void init(TerasologyEngine gameEngine) {
-        _gameInstance = gameEngine;
-
+    public void initialize() {
         setupMainMenu();
         setupSelectWorldMenu();
         setupConfigMenu();
@@ -212,7 +215,7 @@ public class StateMainMenu implements GameState {
     }
 
     @Override
-    public void activate() {
+    public void loadResources() {
         Mouse.setGrabbed(false);
         playBackgroundMusic();
 
@@ -247,14 +250,9 @@ public class StateMainMenu implements GameState {
     }
 
     @Override
-    public void deactivate() {
+    public void unloadResources() {
         stopBackgroundMusic();
         GUIManager.getInstance().closeWindows();
-    }
-
-    @Override
-    public void dispose() {
-        // Nothing to do here.
     }
 
     private void playBackgroundMusic() {
@@ -265,23 +263,22 @@ public class StateMainMenu implements GameState {
         AudioManager.getInstance().stopAllSounds();
     }
 
-    @Override
     public void handleInput(float delta) {
         processKeyboardInput();
         processMouseInput();
     }
 
     @Override
-    public void update(float delta) {
+    public void onRender(float delta) {
         updateUserInterface();
-    }
-
-    @Override
-    public void render() {
+        
+        // Render
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glLoadIdentity();
 
         renderUserInterface();
+        
+        handleInput(delta);
     }
 
     public void renderUserInterface() {

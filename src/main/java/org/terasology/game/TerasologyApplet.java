@@ -77,7 +77,7 @@ public final class TerasologyApplet extends Applet {
             public void run() {
                 try {
                     engine = new TerasologyEngine();
-                    engine.run(new StateMainMenu());
+                    engine.run(new StateMainMenu(engine));
                     engine.dispose();
                 } catch (Exception e) {
                     Logger.getLogger(TerasologyApplet.class.getName()).log(Level.SEVERE, e.toString(), e);

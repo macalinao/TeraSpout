@@ -33,6 +33,7 @@ import javax.vecmath.Vector3f;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
+import org.spout.api.gamestate.GameState;
 import org.terasology.asset.AssetType;
 import org.terasology.asset.AssetUri;
 import org.terasology.componentSystem.UpdateSubscriberSystem;
@@ -78,7 +79,7 @@ import org.terasology.utilities.FastRandom;
  * @author Anton Kireev <adeon.k87@gmail.com>
  * @version 0.1
  */
-public class StateSinglePlayer implements GameState {
+public class StateSinglePlayer extends GameState {
 
     public static final String ENTITY_DATA_FILE = "entity.dat";
     private Logger logger = Logger.getLogger(getClass().getName());
@@ -86,6 +87,8 @@ public class StateSinglePlayer implements GameState {
     private String currentWorldName;
     private String currentWorldSeed;
     private long currentWorldStartTime;
+    
+    private TerasologyEngine engine;
 
     private PersistableEntityManager entityManager;
 
@@ -99,22 +102,13 @@ public class StateSinglePlayer implements GameState {
 
     /* GAME LOOP */
     private boolean pauseGame = false;
-
-    public StateSinglePlayer(String worldName) {
-        this(worldName, null, 0);
+    
+    public StateSinglePlayer(TerasologyEngine engine) {
+    	this.engine = engine;
     }
 
-    public StateSinglePlayer(String worldName, String seed) {
-        this(worldName, seed, 0);
-    }
-
-    public StateSinglePlayer(String worldName, String seed, long time) {
-        this.currentWorldName = worldName;
-        this.currentWorldSeed = seed;
-        this.currentWorldStartTime = time;
-    }
-
-    public void init(TerasologyEngine engine) {
+    @Override
+    public void initialize() {
         cacheTextures();
 
         entityManager = new EntitySystemBuilder().build();
@@ -167,12 +161,12 @@ public class StateSinglePlayer implements GameState {
     }
 
     @Override
-    public void activate() {
+    public void loadResources() {
         initWorld(currentWorldName, currentWorldSeed, currentWorldStartTime);
     }
 
     @Override
-    public void deactivate() {
+    public void unloadResources() {
         for (ComponentSystem system : componentSystemManager.iterateAll()) {
             system.shutdown();
         }
@@ -186,7 +180,6 @@ public class StateSinglePlayer implements GameState {
         entityManager.clear();
     }
 
-    @Override
     public void dispose() {
         if (worldRenderer != null) {
             worldRenderer.dispose();
@@ -195,7 +188,7 @@ public class StateSinglePlayer implements GameState {
     }
 
     @Override
-    public void update(float delta) {
+    public void onRender(float delta) {
         /* GUI */
         updateUserInterface();
 
@@ -223,9 +216,10 @@ public class StateSinglePlayer implements GameState {
         } else {
             GUIManager.getInstance().removeWindow("engine:statusScreen");
         }
+        
+        handleInput(delta);
     }
 
-    @Override
     public void handleInput(float delta) {
         cameraTargetSystem.update();
         inputSystem.update(delta);
