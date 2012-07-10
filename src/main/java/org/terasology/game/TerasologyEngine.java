@@ -103,7 +103,6 @@ public class TerasologyEngine extends SpoutClient {
         initLogger();
         logger.log(Level.INFO, "Initializing Terasology...");
 
-        initNativeLibs();
         initDisplay();
         initOpenGL();
         initOpenAL();
@@ -227,32 +226,6 @@ public class TerasologyEngine extends SpoutClient {
 
     public int getActiveTaskCount() {
         return threadPool.getActiveCount();
-    }
-
-    private void initNativeLibs() {
-        switch (LWJGLUtil.getPlatform()) {
-            case LWJGLUtil.PLATFORM_MACOSX:
-                addLibraryPath(new File(PathManager.getInstance().getDataPath(), "natives/macosx"));
-                break;
-            case LWJGLUtil.PLATFORM_LINUX:
-                addLibraryPath(new File(PathManager.getInstance().getDataPath(), "natives/linux"));
-                if (System.getProperty("os.arch").contains("64"))
-                    System.loadLibrary("openal64");
-                else
-                    System.loadLibrary("openal");
-                break;
-            case LWJGLUtil.PLATFORM_WINDOWS:
-                addLibraryPath(new File(PathManager.getInstance().getDataPath(), "natives/windows"));
-
-                if (System.getProperty("os.arch").contains("64"))
-                    System.loadLibrary("OpenAL64");
-                else
-                    System.loadLibrary("OpenAL32");
-                break;
-            default:
-                logger.log(Level.SEVERE, "Unsupported operating system: " + LWJGLUtil.getPlatformName());
-                System.exit(1);
-        }
     }
 
     private void addLibraryPath(File libPath) {
