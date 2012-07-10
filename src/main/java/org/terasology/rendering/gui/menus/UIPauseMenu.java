@@ -15,6 +15,9 @@
  */
 package org.terasology.rendering.gui.menus;
 
+import javax.vecmath.Vector2f;
+import javax.vecmath.Vector3f;
+
 import org.terasology.components.CharacterMovementComponent;
 import org.terasology.components.HealthComponent;
 import org.terasology.components.LocalPlayerComponent;
@@ -22,7 +25,7 @@ import org.terasology.components.PlayerComponent;
 import org.terasology.components.world.LocationComponent;
 import org.terasology.entitySystem.EntityRef;
 import org.terasology.game.CoreRegistry;
-import org.terasology.game.GameEngine;
+import org.terasology.game.TerasologyEngine;
 import org.terasology.game.modes.StateMainMenu;
 import org.terasology.logic.LocalPlayer;
 import org.terasology.logic.manager.AssetManager;
@@ -33,9 +36,6 @@ import org.terasology.rendering.gui.framework.IClickListener;
 import org.terasology.rendering.gui.framework.UIDisplayElement;
 import org.terasology.rendering.gui.framework.UIDisplayWindow;
 import org.terasology.rendering.gui.framework.UIGraphicsElement;
-
-import javax.vecmath.Vector2f;
-import javax.vecmath.Vector3f;
 
 /**
  * Simple pause menu providing buttons for respawning the player and creating a new world.
@@ -67,7 +67,7 @@ public class UIPauseMenu extends UIDisplayWindow {
 
         _exitButton.addClickListener(new IClickListener() {
             public void clicked(UIDisplayElement element) {
-                CoreRegistry.get(GameEngine.class).shutdown();
+                CoreRegistry.get(TerasologyEngine.class).shutdown();
             }
         });
 
@@ -114,7 +114,7 @@ public class UIPauseMenu extends UIDisplayWindow {
         _mainMenuButton.addClickListener(new IClickListener() {
             public void clicked(UIDisplayElement element) {
                 setVisible(false);
-                CoreRegistry.get(GameEngine.class).changeState(new StateMainMenu());
+                CoreRegistry.get(TerasologyEngine.class).changeState(new StateMainMenu());
             }
         });
 

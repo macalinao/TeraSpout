@@ -1,17 +1,21 @@
 package org.terasology.rendering.gui.dialogs;
 
+import javax.vecmath.Vector2f;
+
 import org.newdawn.slick.Color;
 import org.terasology.game.CoreRegistry;
-import org.terasology.game.GameEngine;
+import org.terasology.game.TerasologyEngine;
 import org.terasology.game.modes.StateSinglePlayer;
 import org.terasology.logic.manager.Config;
 import org.terasology.logic.manager.GUIManager;
-import org.terasology.rendering.gui.components.*;
+import org.terasology.rendering.gui.components.UIButton;
+import org.terasology.rendering.gui.components.UIDialogBox;
+import org.terasology.rendering.gui.components.UIInput;
+import org.terasology.rendering.gui.components.UIList;
+import org.terasology.rendering.gui.components.UIText;
 import org.terasology.rendering.gui.framework.IClickListener;
 import org.terasology.rendering.gui.framework.UIDisplayElement;
 import org.terasology.utilities.FastRandom;
-
-import javax.vecmath.Vector2f;
 
 /*
  * Dialog for generate new world
@@ -75,7 +79,7 @@ public class UIDialogCreateNewWorld extends UIDialogBox {
                 } else {
                     Config.getInstance().setWorldTitle(getWorldName());
                 }
-                CoreRegistry.get(GameEngine.class).changeState(new StateSinglePlayer(Config.getInstance().getWorldTitle(), Config.getInstance().getDefaultSeed()));
+                CoreRegistry.get(TerasologyEngine.class).changeState(new StateSinglePlayer(Config.getInstance().getWorldTitle(), Config.getInstance().getDefaultSeed()));
             }
         });
 

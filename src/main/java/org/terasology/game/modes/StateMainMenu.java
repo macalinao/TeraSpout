@@ -15,9 +15,14 @@
  */
 package org.terasology.game.modes;
 
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.glLoadIdentity;
+
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.terasology.game.GameEngine;
+import org.terasology.game.TerasologyEngine;
 import org.terasology.logic.manager.AudioManager;
 import org.terasology.logic.manager.Config;
 import org.terasology.logic.manager.GUIManager;
@@ -27,8 +32,6 @@ import org.terasology.rendering.gui.framework.UIDisplayElement;
 import org.terasology.rendering.gui.menus.UIConfigMenu;
 import org.terasology.rendering.gui.menus.UIMainMenu;
 import org.terasology.rendering.gui.menus.UISelectWorldMenu;
-
-import static org.lwjgl.opengl.GL11.*;
 
 /**
  * The class implements the main game menu.
@@ -48,10 +51,10 @@ public class StateMainMenu implements GameState {
     private UIConfigMenu _configMenu;
     private UISelectWorldMenu _selectWorldMenu;
 
-    private GameEngine _gameInstance = null;
+    private TerasologyEngine _gameInstance = null;
 
     @Override
-    public void init(GameEngine gameEngine) {
+    public void init(TerasologyEngine gameEngine) {
         _gameInstance = gameEngine;
 
         setupMainMenu();

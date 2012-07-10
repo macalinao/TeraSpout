@@ -21,6 +21,14 @@ import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
 import groovy.util.ResourceException;
 import groovy.util.ScriptException;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.vecmath.Vector3f;
+
 import org.lwjgl.input.Keyboard;
 import org.terasology.components.HealthComponent;
 import org.terasology.components.ItemComponent;
@@ -36,18 +44,12 @@ import org.terasology.events.input.binds.ForwardsButton;
 import org.terasology.events.input.binds.LeftStrafeButton;
 import org.terasology.events.inventory.ReceiveItemEvent;
 import org.terasology.game.CoreRegistry;
-import org.terasology.game.GameEngine;
+import org.terasology.game.TerasologyEngine;
 import org.terasology.game.modes.StateSinglePlayer;
 import org.terasology.input.InputSystem;
 import org.terasology.logic.LocalPlayer;
 import org.terasology.model.blocks.BlockFamily;
 import org.terasology.model.blocks.management.BlockManager;
-
-import javax.vecmath.Vector3f;
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Manages everything related to using Groovy from within Java.
@@ -216,11 +218,11 @@ public class GroovyManager {
         }
 
         public void gotoWorld(String title) {
-            CoreRegistry.get(GameEngine.class).changeState(new StateSinglePlayer(title));
+            CoreRegistry.get(TerasologyEngine.class).changeState(new StateSinglePlayer(title));
         }
 
         public void gotoWorld(String title, String seed) {
-            CoreRegistry.get(GameEngine.class).changeState(new StateSinglePlayer(title, seed));
+            CoreRegistry.get(TerasologyEngine.class).changeState(new StateSinglePlayer(title, seed));
         }
 
         public void dumpEntities() throws IOException {
@@ -232,7 +234,7 @@ public class GroovyManager {
         }
 
         public void exit() {
-            CoreRegistry.get(GameEngine.class).shutdown();
+            CoreRegistry.get(TerasologyEngine.class).shutdown();
         }
     }
 }

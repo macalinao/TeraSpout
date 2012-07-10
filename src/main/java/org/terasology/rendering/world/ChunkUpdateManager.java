@@ -15,9 +15,10 @@
  */
 package org.terasology.rendering.world;
 
-import com.google.common.collect.Sets;
+import java.util.Set;
+
 import org.terasology.game.CoreRegistry;
-import org.terasology.game.GameEngine;
+import org.terasology.game.TerasologyEngine;
 import org.terasology.logic.manager.Config;
 import org.terasology.logic.world.Chunk;
 import org.terasology.logic.world.WorldProvider;
@@ -25,7 +26,7 @@ import org.terasology.logic.world.WorldView;
 import org.terasology.rendering.primitives.ChunkMesh;
 import org.terasology.rendering.primitives.ChunkTessellator;
 
-import java.util.Set;
+import com.google.common.collect.Sets;
 
 /**
  * Provides the mechanism for updating and generating chunks.
@@ -93,7 +94,7 @@ public final class ChunkUpdateManager {
             }
         };
 
-        CoreRegistry.get(GameEngine.class).submitTask("Chunk Update", r);
+        CoreRegistry.get(TerasologyEngine.class).submitTask("Chunk Update", r);
     }
 
 }

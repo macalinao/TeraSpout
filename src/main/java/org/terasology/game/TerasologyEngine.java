@@ -23,6 +23,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GLContext;
+import org.spout.engine.SpoutClient;
 import org.terasology.asset.AssetType;
 import org.terasology.asset.AssetUri;
 import org.terasology.asset.loaders.*;
@@ -53,7 +54,7 @@ import static org.lwjgl.opengl.GL11.*;
 /**
  * @author Immortius
  */
-public class TerasologyEngine implements GameEngine {
+public class TerasologyEngine extends SpoutClient {
 
     private Logger logger = Logger.getLogger(getClass().getName());
 
@@ -67,12 +68,15 @@ public class TerasologyEngine implements GameEngine {
     private final ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
     public TerasologyEngine() {
+    	super();
     }
 
     @Override
-    public void init() {
-        if (initialised)
+    public void init(String[] args) {
+    	super.init(args);
+        if (initialised) {
             return;
+        }
         initLogger();
         logger.log(Level.INFO, "Initializing Terasology...");
 
@@ -119,27 +123,24 @@ public class TerasologyEngine implements GameEngine {
         }
     }
 
-    @Override
     public void run(GameState initialState) {
         if (!initialised) {
-            init();
+            throw new IllegalStateException("Game not initialized to run a GameState!");
         }
         changeState(initialState);
         running = true;
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-        CoreRegistry.put(GameEngine.class, this);
+        CoreRegistry.put(TerasologyEngine.class, this);
 
         mainLoop();
 
         cleanup();
     }
 
-    @Override
     public void shutdown() {
         running = false;
     }
 
-    @Override
     public void dispose() {
         if (!running) {
             disposed = true;
@@ -151,17 +152,14 @@ public class TerasologyEngine implements GameEngine {
         }
     }
 
-    @Override
     public boolean isRunning() {
         return running;
     }
 
-    @Override
     public boolean isDisposed() {
         return disposed;
     }
 
-    @Override
     public void changeState(GameState newState) {
         if (running) {
             pendingStateChanges.add(new ChangeState(newState));
@@ -171,7 +169,6 @@ public class TerasologyEngine implements GameEngine {
         }
     }
 
-    @Override
     public void pushState(GameState newState) {
         if (running) {
             pendingStateChanges.add(new PushState(newState));
@@ -180,7 +177,6 @@ public class TerasologyEngine implements GameEngine {
         }
     }
 
-    @Override
     public void popState() {
         if (running) {
             pendingStateChanges.add(new PopState());
@@ -189,7 +185,6 @@ public class TerasologyEngine implements GameEngine {
         }
     }
 
-    @Override
     public void submitTask(final String name, final Runnable task) {
         threadPool.execute(new Runnable() {
             @Override
@@ -207,7 +202,6 @@ public class TerasologyEngine implements GameEngine {
         });
     }
 
-    @Override
     public int getActiveTaskCount() {
         return threadPool.getActiveCount();
     }

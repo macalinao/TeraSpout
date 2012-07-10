@@ -15,9 +15,17 @@
  */
 package org.terasology.rendering.gui.menus;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.vecmath.Vector2f;
+
 import org.lwjgl.opengl.Display;
 import org.terasology.game.CoreRegistry;
-import org.terasology.game.GameEngine;
+import org.terasology.game.TerasologyEngine;
 import org.terasology.game.modes.StateSinglePlayer;
 import org.terasology.logic.manager.AssetManager;
 import org.terasology.logic.manager.Config;
@@ -33,13 +41,6 @@ import org.terasology.rendering.gui.dialogs.UIDialogCreateNewWorld;
 import org.terasology.rendering.gui.framework.IClickListener;
 import org.terasology.rendering.gui.framework.UIDisplayElement;
 import org.terasology.rendering.gui.framework.UIDisplayWindow;
-
-import javax.vecmath.Vector2f;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Select world menu screen.
@@ -180,7 +181,7 @@ public class UISelectWorldMenu extends UIDisplayWindow {
             Config.getInstance().setDefaultSeed(info.getSeed());
             Config.getInstance().setWorldTitle(info.getTitle());
             // TODO: Need to load time too. Maybe just pass through WorldInfo?
-            CoreRegistry.get(GameEngine.class).changeState(new StateSinglePlayer(info.getTitle(), info.getSeed(), info.getTime()));
+            CoreRegistry.get(TerasologyEngine.class).changeState(new StateSinglePlayer(info.getTitle(), info.getSeed(), info.getTime()));
         } catch (Exception e) {
             GUIManager.getInstance().showMessage("Error", "Failed reading world data object. Sorry.");
         }

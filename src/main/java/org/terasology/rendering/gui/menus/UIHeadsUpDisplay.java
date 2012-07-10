@@ -15,19 +15,25 @@
  */
 package org.terasology.rendering.gui.menus;
 
+import javax.vecmath.Vector2f;
+
 import org.lwjgl.opengl.Display;
-import org.terasology.entitySystem.*;
+import org.terasology.entitySystem.EntityManager;
+import org.terasology.entitySystem.EventHandlerSystem;
+import org.terasology.entitySystem.EventSystem;
 import org.terasology.game.CoreRegistry;
-import org.terasology.game.GameEngine;
+import org.terasology.game.TerasologyEngine;
 import org.terasology.game.Timer;
 import org.terasology.logic.LocalPlayer;
 import org.terasology.logic.manager.Config;
-import org.terasology.rendering.gui.components.*;
+import org.terasology.rendering.gui.components.UIBuff;
+import org.terasology.rendering.gui.components.UICrosshair;
+import org.terasology.rendering.gui.components.UIHealthBar;
+import org.terasology.rendering.gui.components.UIText;
+import org.terasology.rendering.gui.components.UIToolbar;
 import org.terasology.rendering.gui.framework.UIDisplayWindow;
 import org.terasology.rendering.primitives.ChunkTessellator;
 import org.terasology.rendering.world.WorldRenderer;
-
-import javax.vecmath.Vector2f;
 
 /**
  * HUD displayed on the user's screen.
@@ -109,7 +115,7 @@ public class UIHeadsUpDisplay extends UIDisplayWindow implements EventHandlerSys
             _debugLine1.setText(String.format("fps: %.2f, mem usage: %.2f MB, total mem: %.2f, max mem: %.2f", timer.getFps(), memoryUsage, Runtime.getRuntime().totalMemory() / 1048576.0, Runtime.getRuntime().maxMemory() / 1048576.0));
             _debugLine2.setText(String.format("%s", CoreRegistry.get(LocalPlayer.class)));
             _debugLine3.setText(String.format("%s", CoreRegistry.get(WorldRenderer.class)));
-            _debugLine4.setText(String.format("total vus: %s | active threads: %s", ChunkTessellator.getVertexArrayUpdateCount(), CoreRegistry.get(GameEngine.class).getActiveTaskCount()));
+            _debugLine4.setText(String.format("total vus: %s | active threads: %s", ChunkTessellator.getVertexArrayUpdateCount(), CoreRegistry.get(TerasologyEngine.class).getActiveTaskCount()));
         }
     }
 
