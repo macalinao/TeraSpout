@@ -15,9 +15,28 @@
  */
 package org.terasology.model.blocks;
 
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glIsEnabled;
+
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.imageio.ImageIO;
+import javax.vecmath.Vector2f;
+import javax.vecmath.Vector3d;
+import javax.vecmath.Vector4f;
+
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.util.ResourceLoader;
-import org.terasology.collection.EnumBooleanMap;
 import org.terasology.logic.manager.ShaderManager;
 import org.terasology.math.Side;
 import org.terasology.model.shapes.BlockMeshPart;
@@ -27,22 +46,6 @@ import org.terasology.rendering.interfaces.IGameObject;
 import org.terasology.rendering.primitives.Mesh;
 import org.terasology.rendering.primitives.Tessellator;
 import org.terasology.rendering.shader.ShaderProgram;
-
-import javax.imageio.ImageIO;
-import javax.vecmath.Vector2f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector4f;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static org.lwjgl.opengl.GL11.*;
 
 /**
  * Stores all information for a specific block type.
@@ -135,8 +138,8 @@ public class Block implements IGameObject {
     private Mesh _mesh;
     private BlockMeshPart _centerMesh;
     private EnumMap<Side, BlockMeshPart> _sideMesh = new EnumMap<Side, BlockMeshPart>(Side.class);
-    private EnumBooleanMap<Side> _fullSide = new EnumBooleanMap<Side>(Side.class);
-    private EnumBooleanMap<Side> _affectedByLut = new EnumBooleanMap<Side>(Side.class);
+    private EnumSet<Side> _fullSide = EnumSet.noneOf(Side.class);
+    private EnumSet<Side> _affectedByLut = EnumSet.noneOf(Side.class);
 
     // For liquid handling
     private EnumMap<Side, BlockMeshPart> _loweredSideMesh = new EnumMap<Side, BlockMeshPart>(Side.class);
@@ -221,7 +224,7 @@ public class Block implements IGameObject {
     public Vector4f calcColorOffsetFor(Side side, double temperature, double humidity) {
         Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-        if (_affectedByLut.get(side)) {
+        if (_affectedByLut.contains(side)) {
             if (getColorSource() == COLOR_SOURCE.COLOR_LUT)
                 color.set(calcColorForTemperatureAndHumidity(temperature, humidity));
             else if (getColorSource() == COLOR_SOURCE.FOLIAGE_LUT) {
@@ -424,12 +427,20 @@ public class Block implements IGameObject {
     }
 
     public Block withFullSide(Side side, boolean full) {
-        _fullSide.put(side, full);
+    	if (full) {
+    		_fullSide.add(side);
+    	} else {
+    		_fullSide.remove(side);
+    	}
         return this;
     }
 
     public Block withAffectedByLut(Side side, boolean full) {
-        _affectedByLut.put(side, full);
+    	if (full) {
+    		_affectedByLut.add(side);
+    	} else {
+    		_affectedByLut.remove(side);
+    	}
         return this;
     }
 
@@ -501,7 +512,7 @@ public class Block implements IGameObject {
     }
 
     public boolean isBlockingSide(Side side) {
-        return _fullSide.get(side);
+        return _fullSide.contains(side);
     }
 
     public BlockMeshPart getSideMesh(Side side) {
