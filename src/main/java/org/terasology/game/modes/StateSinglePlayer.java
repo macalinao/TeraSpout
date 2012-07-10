@@ -125,7 +125,6 @@ public class StateSinglePlayer extends GameState {
         componentSystemManager.register(inputSystem, "engine:InputSystem");
 
         componentSystemManager.loadEngineSystems();
-        componentSystemManager.loadSystems("miniions", "org.terasology.mods.miniions");
 
         CoreRegistry.put(WorldPersister.class, new WorldPersister(entityManager));
 
