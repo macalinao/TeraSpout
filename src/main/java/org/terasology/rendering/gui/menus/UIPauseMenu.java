@@ -68,7 +68,7 @@ public class UIPauseMenu extends UIDisplayWindow {
 
         _exitButton.addClickListener(new IClickListener() {
             public void clicked(UIDisplayElement element) {
-                CoreRegistry.get(TerasologyEngine.class).shutdown();
+                CoreRegistry.get(TerasologyEngine.class).stop();
             }
         });
 

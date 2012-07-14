@@ -25,8 +25,8 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.spout.api.Spout;
+import org.spout.engine.Arguments;
 import org.spout.engine.SpoutClient;
-import org.terasology.game.modes.StateMainMenu;
 import org.terasology.logic.manager.PathManager;
 
 import com.beust.jcommander.JCommander;
@@ -67,8 +67,10 @@ public final class Terasology {
 			
 			Spout.setEngine(engine);
 			Spout.getFilesystem().init();
-			new JCommander(engine, args);
-			engine.init(args);
+			Arguments main = new Arguments();
+			JCommander commands = new JCommander(main);
+			commands.parse(args);
+			engine.init(main);
 			engine.start();
 		
 //			engine.init();

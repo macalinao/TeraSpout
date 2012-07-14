@@ -1,9 +1,20 @@
 package org.terasology.componentSystem.controllers;
 
-import com.bulletphysics.linearmath.QuaternionUtil;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.vecmath.Quat4f;
+import javax.vecmath.Vector3d;
+import javax.vecmath.Vector3f;
+
 import org.terasology.componentSystem.RenderSystem;
-import org.terasology.componentSystem.UpdateSubscriberSystem;
-import org.terasology.components.*;
+import org.terasology.components.CharacterMovementComponent;
+import org.terasology.components.HealthComponent;
+import org.terasology.components.InventoryComponent;
+import org.terasology.components.ItemComponent;
+import org.terasology.components.LocalPlayerComponent;
+import org.terasology.components.PlayerComponent;
 import org.terasology.components.world.BlockComponent;
 import org.terasology.components.world.LocationComponent;
 import org.terasology.entitySystem.EntityRef;
@@ -14,7 +25,17 @@ import org.terasology.events.DamageEvent;
 import org.terasology.events.NoHealthEvent;
 import org.terasology.events.input.MouseXAxisEvent;
 import org.terasology.events.input.MouseYAxisEvent;
-import org.terasology.events.input.binds.*;
+import org.terasology.events.input.binds.AttackButton;
+import org.terasology.events.input.binds.ForwardsMovementAxis;
+import org.terasology.events.input.binds.FrobButton;
+import org.terasology.events.input.binds.JumpButton;
+import org.terasology.events.input.binds.RunButton;
+import org.terasology.events.input.binds.StrafeMovementAxis;
+import org.terasology.events.input.binds.ToolbarNextButton;
+import org.terasology.events.input.binds.ToolbarPrevButton;
+import org.terasology.events.input.binds.ToolbarSlotButton;
+import org.terasology.events.input.binds.UseItemButton;
+import org.terasology.events.input.binds.VerticalMovementAxis;
 import org.terasology.game.CoreRegistry;
 import org.terasology.game.Timer;
 import org.terasology.input.ButtonState;
@@ -28,12 +49,7 @@ import org.terasology.model.blocks.Block;
 import org.terasology.model.structures.RayBlockIntersection;
 import org.terasology.rendering.cameras.DefaultCamera;
 
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.bulletphysics.linearmath.QuaternionUtil;
 
 /**
  * @author Immortius <immortius@gmail.com>
@@ -41,7 +57,7 @@ import java.util.List;
 // TODO: This needs a really good cleanup
 // TODO: Move more input stuff to a specific input system?
 // TODO: Camera should become an entity/component, so it can follow the player naturally
-public class LocalPlayerSystem implements UpdateSubscriberSystem, RenderSystem, EventHandlerSystem {
+public class LocalPlayerSystem implements RenderSystem, EventHandlerSystem {
     private LocalPlayer localPlayer;
     private Timer timer;
 
@@ -70,36 +86,6 @@ public class LocalPlayerSystem implements UpdateSubscriberSystem, RenderSystem, 
 
     public void setPlayerCamera(DefaultCamera camera) {
         playerCamera = camera;
-    }
-
-    @Override
-    public void update(float delta) {
-        if (!localPlayer.isValid())
-            return;
-
-        EntityRef entity = localPlayer.getEntity();
-        LocalPlayerComponent localPlayerComponent = entity.getComponent(LocalPlayerComponent.class);
-        CharacterMovementComponent characterMovementComponent = entity.getComponent(CharacterMovementComponent.class);
-        LocationComponent location = entity.getComponent(LocationComponent.class);
-        PlayerComponent playerComponent = entity.getComponent(PlayerComponent.class);
-
-        if (localPlayerComponent.isDead) {
-            if (!checkRespawn(delta, entity, localPlayerComponent, characterMovementComponent, location, playerComponent))
-                return;
-        }
-
-        updateMovement(localPlayerComponent, characterMovementComponent, location);
-
-        // TODO: Remove, use component camera, breaks spawn camera anyway
-        Quat4f lookRotation = new Quat4f();
-        QuaternionUtil.setEuler(lookRotation, TeraMath.DEG_TO_RAD * localPlayerComponent.viewYaw, TeraMath.DEG_TO_RAD * localPlayerComponent.viewPitch, 0);
-        updateCamera(characterMovementComponent, location.getWorldPosition(), lookRotation);
-
-        // Hand animation update
-        localPlayerComponent.handAnimation = Math.max(0, localPlayerComponent.handAnimation - 2.5f * delta);
-
-        entity.saveComponent(characterMovementComponent);
-        entity.saveComponent(localPlayerComponent);
     }
 
     @ReceiveEvent(components = LocalPlayerComponent.class)

@@ -34,7 +34,7 @@ import static org.lwjgl.opengl.GL11.*;
  * @author Benjamin Glatzel <benjamin.glatzel@me.com>
  */
 @RegisterComponentSystem(headedOnly = true)
-public class MiniaturizerSystem implements UpdateSubscriberSystem, RenderSystem {
+public class MiniaturizerSystem implements RenderSystem {
 
     private EntityManager entityManager;
     private WorldRenderer worldRenderer;

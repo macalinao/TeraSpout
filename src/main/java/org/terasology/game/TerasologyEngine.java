@@ -49,6 +49,7 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GLContext;
 import org.spout.api.gamestate.GameState;
+import org.spout.engine.Arguments;
 import org.spout.engine.SpoutClient;
 import org.terasology.asset.AssetType;
 import org.terasology.asset.AssetUri;
@@ -87,6 +88,7 @@ public class TerasologyEngine extends SpoutClient {
     private boolean disposed;
     private List<StateChangeFunction> pendingStateChanges = Lists.newArrayList();
 
+    private GameState state;
     private Timer timer;
     private final ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
@@ -95,13 +97,23 @@ public class TerasologyEngine extends SpoutClient {
     }
 
     @Override
-    public void init(String[] args) {
+    public void init(Arguments args) {
     	super.init(args);
+    }
+    
+    @Override
+    public void start(boolean checkWorlds) {
+    	super.start(checkWorlds);
+    	scheduler.startRenderThread();
+    }
+    
+    @Override
+    public void initRenderer() {
         if (initialised) {
             return;
         }
         initLogger();
-        logger.log(Level.INFO, "Initializing Terasology...");
+        logger.log(Level.INFO, "Initializing TeraSpout...");
 
         initDisplay();
         initOpenGL();
@@ -154,24 +166,19 @@ public class TerasologyEngine extends SpoutClient {
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         CoreRegistry.put(TerasologyEngine.class, this);
 
-        mainLoop();
-
         cleanup();
     }
 
-    public void shutdown() {
+    @Override
+    public void stop() {
         running = false;
-    }
-
-    public void dispose() {
-        if (!running) {
             disposed = true;
             initialised = false;
             AudioManager.getInstance().destroy();
             Mouse.destroy();
             Keyboard.destroy();
             Display.destroy();
-        }
+            super.stop();
     }
 
     public boolean isRunning() {
@@ -377,53 +384,46 @@ public class TerasologyEngine extends SpoutClient {
         }
     }
 
-    private void mainLoop() {
-        PerformanceMonitor.startActivity("Other");
-        // MAIN GAME LOOP
-        GameState state = null;
-        while (running && !Display.isCloseRequested()) {
-
-            // Only process rendering and updating once a second
-            // TODO: Add debug config setting to run even if display inactive
-            if (!Display.isActive()) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    logger.log(Level.WARNING, e.toString(), e);
-                }
-
-                Display.processMessages();
-                continue;
+    @Override
+    public void render(float dt) {
+        // Only process rendering and updating once a second
+        // TODO: Add debug config setting to run even if display inactive
+        if (!Display.isActive()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                logger.log(Level.WARNING, e.toString(), e);
             }
-
-            processStateChanges();
-            state = stateStack.peek();
-
-            if (state == null) {
-                shutdown();
-                break;
-            }
-
-            timer.tick();
-
-            PerformanceMonitor.startActivity("Render");
-            state.onRender(timer.getDelta());
-            Display.update();
-            Display.sync(60);
-            PerformanceMonitor.endActivity();
-
-            PerformanceMonitor.startActivity("Audio");
-            AudioManager.getInstance().update();
-            PerformanceMonitor.endActivity();
-
-            PerformanceMonitor.rollCycle();
-            PerformanceMonitor.startActivity("Other");
-
-            if (Display.wasResized())
-                resizeViewport();
+            
+            Display.processMessages();
+            return;
         }
+
+        processStateChanges();
+        state = stateStack.peek();
+
+        if (state == null) {
+            stop();
+            return;
+        }
+
+        timer.tick();
+
+        PerformanceMonitor.startActivity("Render");
+        state.onRender(timer.getDelta());
+        Display.update();
+        Display.sync(60);
         PerformanceMonitor.endActivity();
-        running = false;
+
+        PerformanceMonitor.startActivity("Audio");
+        AudioManager.getInstance().update();
+        PerformanceMonitor.endActivity();
+
+        PerformanceMonitor.rollCycle();
+        PerformanceMonitor.startActivity("Other");
+
+        if (Display.wasResized())
+            resizeViewport();
     }
 
     private void processStateChanges() {
@@ -495,6 +495,6 @@ public class TerasologyEngine extends SpoutClient {
         @Override
         public void enact() {
             doPopState();
-        }
-    }
+		}
+	}
 }

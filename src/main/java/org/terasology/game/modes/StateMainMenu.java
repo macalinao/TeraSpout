@@ -91,7 +91,7 @@ public class StateMainMenu extends GameState {
         exitButton.addClickListener(new IClickListener() {
             @Override
             public void clicked(UIDisplayElement element) {
-                _gameInstance.shutdown();
+                _gameInstance.stop();
             }
         });
 
@@ -299,7 +299,7 @@ public class StateMainMenu extends GameState {
 
                 if (!Keyboard.isRepeatEvent()) {
                     if (key == Keyboard.KEY_ESCAPE && !Keyboard.isRepeatEvent() && Keyboard.getEventKeyState()) {
-                        _gameInstance.shutdown();
+                        _gameInstance.stop();
                         return;
                     }
                 }

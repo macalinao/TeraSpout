@@ -226,7 +226,7 @@ public class GroovyManager {
         }
 
         public void exit() {
-            CoreRegistry.get(TerasologyEngine.class).shutdown();
+            CoreRegistry.get(TerasologyEngine.class).stop();
         }
     }
 }

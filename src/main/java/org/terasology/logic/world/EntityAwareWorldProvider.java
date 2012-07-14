@@ -16,10 +16,10 @@
 
 package org.terasology.logic.world;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Queues;
-import org.terasology.componentSystem.UpdateSubscriberSystem;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+
 import org.terasology.components.HealthComponent;
 import org.terasology.components.world.BlockComponent;
 import org.terasology.entitySystem.EntityManager;
@@ -33,14 +33,14 @@ import org.terasology.game.CoreRegistry;
 import org.terasology.math.Vector3i;
 import org.terasology.model.blocks.Block;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Queues;
 
 /**
  * @author Immortius
  */
-public class EntityAwareWorldProvider extends AbstractWorldProviderDecorator implements BlockEntityRegistry, EventHandlerSystem, UpdateSubscriberSystem {
+public class EntityAwareWorldProvider extends AbstractWorldProviderDecorator implements BlockEntityRegistry, EventHandlerSystem {
 
     private EntityManager entityManager;
 
@@ -134,24 +134,4 @@ public class EntityAwareWorldProvider extends AbstractWorldProviderDecorator imp
         blockComponentLookup.remove(new Vector3i(block.getPosition()));
     }
 
-    @Override
-    public void update(float delta) {
-        int processed = 0;
-        while (!eventQueue.isEmpty() && processed < 32) {
-            BlockChangedEvent event = eventQueue.poll();
-            getOrCreateEntityAt(event.getBlockPosition()).send(event);
-            processed++;
-        }
-        for (EntityRef entity : tempBlocks) {
-            BlockComponent blockComp = entity.getComponent(BlockComponent.class);
-            if (blockComp == null || !blockComp.temporary)
-                continue;
-
-            HealthComponent healthComp = entity.getComponent(HealthComponent.class);
-            if (healthComp == null || healthComp.currentHealth == healthComp.maxHealth) {
-                entity.destroy();
-            }
-        }
-        tempBlocks.clear();
-    }
 }

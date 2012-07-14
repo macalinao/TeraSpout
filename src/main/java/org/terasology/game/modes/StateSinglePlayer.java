@@ -36,7 +36,6 @@ import org.lwjgl.opengl.Display;
 import org.spout.api.gamestate.GameState;
 import org.terasology.asset.AssetType;
 import org.terasology.asset.AssetUri;
-import org.terasology.componentSystem.UpdateSubscriberSystem;
 import org.terasology.componentSystem.controllers.LocalPlayerSystem;
 import org.terasology.components.LocalPlayerComponent;
 import org.terasology.components.world.LocationComponent;
@@ -190,11 +189,6 @@ public class StateSinglePlayer extends GameState {
     public void onRender(float delta) {
         /* GUI */
         updateUserInterface();
-
-        for (UpdateSubscriberSystem updater : componentSystemManager.iterateUpdateSubscribers()) {
-            PerformanceMonitor.startActivity(updater.getClass().getSimpleName());
-            updater.update(delta);
-        }
 
         if (worldRenderer != null && shouldUpdateWorld()) {
             worldRenderer.update(delta);

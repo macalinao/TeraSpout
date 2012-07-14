@@ -78,7 +78,6 @@ public final class TerasologyApplet extends Applet {
                 try {
                     engine = new TerasologyEngine();
                     engine.run(new StateMainMenu(engine));
-                    engine.dispose();
                 } catch (Exception e) {
                     Logger.getLogger(TerasologyApplet.class.getName()).log(Level.SEVERE, e.toString(), e);
                 }
@@ -101,7 +100,7 @@ public final class TerasologyApplet extends Applet {
     @Override
     public void destroy() {
         if (engine != null)
-            engine.shutdown();
+            engine.stop();
         try {
             gameThread.join();
         } catch (InterruptedException e) {
