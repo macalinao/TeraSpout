@@ -36,6 +36,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * FIXME teraspout - Replace this class
+ * 
  * @author Immortius
  */
 public class LocalChunkProvider implements ChunkProvider {
