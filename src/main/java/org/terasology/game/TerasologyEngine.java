@@ -49,7 +49,6 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GLContext;
 import org.spout.api.gamestate.GameState;
-import org.spout.engine.Arguments;
 import org.spout.engine.SpoutClient;
 import org.terasology.asset.AssetType;
 import org.terasology.asset.AssetUri;
@@ -79,9 +78,6 @@ import com.google.common.collect.Lists;
  * @author Immortius
  */
 public class TerasologyEngine extends SpoutClient {
-
-    private Logger logger = Logger.getLogger(getClass().getName());
-
     private Deque<GameState> stateStack = new ArrayDeque<GameState>();
     private boolean initialised;
     private boolean running;
@@ -101,7 +97,6 @@ public class TerasologyEngine extends SpoutClient {
         if (initialised) {
             return;
         }
-        initLogger();
         logger.log(Level.INFO, "Initializing TeraSpout...");
 
         initDisplay();
@@ -111,39 +106,6 @@ public class TerasologyEngine extends SpoutClient {
         initManagers();
         initTimer(); // Dependant on LWJGL
         initialised = true;
-    }
-
-    private void initLogger() {
-        if (LWJGLUtil.DEBUG) {
-            System.setOut(new PrintStream(System.out) {
-                @Override
-                public void print(final String message) {
-                    Logger.getLogger("").info(message);
-                }
-            });
-            System.setErr(new PrintStream(System.err) {
-                @Override
-                public void print(final String message) {
-                    Logger.getLogger("").severe(message);
-                }
-            });
-        }
-        File dirPath = PathManager.getInstance().getLogPath();
-
-        if (!dirPath.exists()) {
-            if (!dirPath.mkdirs()) {
-                return;
-            }
-        }
-
-        try {
-            FileHandler fh = new FileHandler(new File(dirPath, "Terasology.log").getAbsolutePath(), true);
-            fh.setLevel(Level.INFO);
-            fh.setFormatter(new SimpleFormatter());
-            Logger.getLogger("").addHandler(fh);
-        } catch (IOException ex) {
-            logger.log(Level.WARNING, ex.toString(), ex);
-        }
     }
 
     public void run(GameState initialState) {
@@ -159,15 +121,14 @@ public class TerasologyEngine extends SpoutClient {
     }
 
     @Override
-    public void stop() {
+    public void stop(String message) {
         running = false;
 		disposed = true;
 		initialised = false;
 		AudioManager.getInstance().destroy();
 		Mouse.destroy();
 		Keyboard.destroy();
-		Display.destroy();
-		super.stop();
+		super.stop(message);
     }
 
     public boolean isRunning() {
