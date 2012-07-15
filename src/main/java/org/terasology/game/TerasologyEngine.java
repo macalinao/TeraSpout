@@ -95,17 +95,6 @@ public class TerasologyEngine extends SpoutClient {
     public TerasologyEngine() {
     	super();
     }
-
-    @Override
-    public void init(Arguments args) {
-    	super.init(args);
-    }
-    
-    @Override
-    public void start(boolean checkWorlds) {
-    	super.start(checkWorlds);
-    	scheduler.startRenderThread();
-    }
     
     @Override
     public void initRenderer() {
@@ -172,13 +161,13 @@ public class TerasologyEngine extends SpoutClient {
     @Override
     public void stop() {
         running = false;
-            disposed = true;
-            initialised = false;
-            AudioManager.getInstance().destroy();
-            Mouse.destroy();
-            Keyboard.destroy();
-            Display.destroy();
-            super.stop();
+		disposed = true;
+		initialised = false;
+		AudioManager.getInstance().destroy();
+		Mouse.destroy();
+		Keyboard.destroy();
+		Display.destroy();
+		super.stop();
     }
 
     public boolean isRunning() {
