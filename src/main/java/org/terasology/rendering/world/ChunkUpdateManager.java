@@ -17,6 +17,7 @@ package org.terasology.rendering.world;
 
 import java.util.Set;
 
+import org.spout.api.geo.World;
 import org.terasology.game.CoreRegistry;
 import org.terasology.game.TerasologyEngine;
 import org.terasology.logic.manager.Config;
@@ -46,9 +47,9 @@ public final class ChunkUpdateManager {
     private static final Set<Chunk> currentlyProcessedChunks = Sets.newHashSet();
 
     private final ChunkTessellator tessellator;
-    private final WorldProvider worldProvider;
+    private final World worldProvider;
 
-    public ChunkUpdateManager(ChunkTessellator tessellator, WorldProvider worldProvider) {
+    public ChunkUpdateManager(ChunkTessellator tessellator, World worldProvider) {
         this.tessellator = tessellator;
         this.worldProvider = worldProvider;
     }

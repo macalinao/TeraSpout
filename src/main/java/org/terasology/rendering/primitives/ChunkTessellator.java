@@ -22,6 +22,7 @@ import gnu.trove.iterator.TFloatIterator;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.iterator.TShortIterator;
 import org.lwjgl.BufferUtils;
+import org.spout.engine.world.SpoutWorld;
 import org.terasology.logic.world.Chunk;
 import org.terasology.logic.world.MiniatureChunk;
 import org.terasology.logic.world.WorldBiomeProvider;
@@ -46,9 +47,9 @@ public final class ChunkTessellator {
     private static final int INT_BYTES = 4;
     private static int _statVertexArrayUpdateCount = 0;
 
-    private WorldBiomeProvider biomeProvider;
+    private SpoutWorld biomeProvider;
 
-    public ChunkTessellator(WorldBiomeProvider biomeProvider) {
+    public ChunkTessellator(SpoutWorld biomeProvider) {
         this.biomeProvider = biomeProvider;
     }
 
@@ -60,8 +61,8 @@ public final class ChunkTessellator {
 
         for (int x = 0; x < Chunk.SIZE_X; x++) {
             for (int z = 0; z < Chunk.SIZE_Z; z++) {
-                float biomeTemp = biomeProvider.getTemperatureAt(chunkOffset.x + x, chunkOffset.z + z);
-                float biomeHumidity = biomeProvider.getHumidityAt(chunkOffset.x + x, chunkOffset.z + z);
+//                float biomeTemp = biomeProvider.getTemperatureAt(chunkOffset.x + x, chunkOffset.z + z);
+//                float biomeHumidity = biomeProvider.getHumidityAt(chunkOffset.x + x, chunkOffset.z + z);
 
                 for (int y = verticalOffset; y < verticalOffset + meshHeight; y++) {
                     Block block = worldView.getBlock(x, y, z);
@@ -69,7 +70,7 @@ public final class ChunkTessellator {
                     if (block == null || block.isInvisible())
                         continue;
 
-                    generateBlockVertices(worldView, mesh, x, y, z, biomeTemp, biomeHumidity);
+                    generateBlockVertices(worldView, mesh, x, y, z);
                 }
             }
         }
@@ -97,7 +98,7 @@ public final class ChunkTessellator {
                     if (block == null || block.isInvisible())
                         continue;
 
-                    generateBlockVertices(localWorldView, mesh, x, y, z, 0.0f, 0.0f);
+                    generateBlockVertices(localWorldView, mesh, x, y, z);
                 }
             }
         }
@@ -258,7 +259,7 @@ public final class ChunkTessellator {
         PerformanceMonitor.endActivity();
     }
 
-    private void generateBlockVertices(WorldView view, ChunkMesh mesh, int x, int y, int z, double temp, double hum) {
+    private void generateBlockVertices(WorldView view, ChunkMesh mesh, int x, int y, int z) {
         Block block = view.getBlock(x, y, z);
 
         /*
@@ -276,7 +277,7 @@ public final class ChunkTessellator {
         Block.BLOCK_FORM blockForm = block.getBlockForm();
 
         if (block.getCenterMesh() != null) {
-            Vector4f colorOffset = block.calcColorOffsetFor(Side.TOP, temp, hum);
+            Vector4f colorOffset = block.calcColorOffsetFor(Side.TOP);
             block.getCenterMesh().appendTo(mesh, x, y, z, colorOffset, renderType.getIndex());
         }
 
@@ -310,7 +311,7 @@ public final class ChunkTessellator {
             if (bottomBlock.getBlockForm() == Block.BLOCK_FORM.LOWERED_BLOCK || bottomBlock.getId() == 0x0) {
                 for (Side dir : Side.values()) {
                     if (drawDir[dir.ordinal()]) {
-                        Vector4f colorOffset = block.calcColorOffsetFor(dir, temp, hum);
+                        Vector4f colorOffset = block.calcColorOffsetFor(dir);
                         block.getLoweredSideMesh(dir).appendTo(mesh, x, y, z, colorOffset, renderType.getIndex());
                     }
                 }
@@ -320,7 +321,7 @@ public final class ChunkTessellator {
 
         for (Side dir : Side.values()) {
             if (drawDir[dir.ordinal()]) {
-                Vector4f colorOffset = block.calcColorOffsetFor(dir, temp, hum);
+                Vector4f colorOffset = block.calcColorOffsetFor(dir);
                 block.getSideMesh(dir).appendTo(mesh, x, y, z, colorOffset, renderType.getIndex());
             }
         }

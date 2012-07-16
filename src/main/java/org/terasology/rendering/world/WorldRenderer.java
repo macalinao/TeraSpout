@@ -58,6 +58,7 @@ import javax.vecmath.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
+import org.spout.engine.world.SpoutWorld;
 import org.terasology.componentSystem.RenderSystem;
 import org.terasology.componentSystem.controllers.LocalPlayerSystem;
 import org.terasology.components.AABBCollisionComponent;
@@ -68,7 +69,6 @@ import org.terasology.game.CoreRegistry;
 import org.terasology.game.TerasologyEngine;
 import org.terasology.game.Timer;
 import org.terasology.logic.LocalPlayer;
-import org.terasology.logic.generators.DefaultGenerators;
 import org.terasology.logic.manager.AudioManager;
 import org.terasology.logic.manager.Config;
 import org.terasology.logic.manager.PathManager;
@@ -92,12 +92,6 @@ import org.terasology.logic.world.WorldTimeEvent;
 import org.terasology.logic.world.WorldUtil;
 import org.terasology.logic.world.WorldView;
 import org.terasology.logic.world.chunkStore.ChunkStoreGZip;
-import org.terasology.logic.world.generator.core.ChunkGeneratorManager;
-import org.terasology.logic.world.generator.core.ChunkGeneratorManagerImpl;
-import org.terasology.logic.world.generator.core.FloraGenerator;
-import org.terasology.logic.world.generator.core.ForestGenerator;
-import org.terasology.logic.world.generator.core.LiquidsGenerator;
-import org.terasology.logic.world.generator.core.PerlinTerrainGenerator;
 import org.terasology.math.Rect2i;
 import org.terasology.math.Region3i;
 import org.terasology.math.TeraMath;
@@ -132,8 +126,7 @@ public final class WorldRenderer implements IGameObject {
     public static final int VERTICAL_SEGMENTS = Config.getInstance().getVerticalChunkMeshSegments();
 
     /* WORLD PROVIDER */
-    private final WorldProvider _worldProvider;
-    private ChunkProvider _chunkProvider;
+    private final SpoutWorld world;
     private ChunkStore chunkStore;
     private Logger _logger = Logger.getLogger(getClass().getName());
 
@@ -178,9 +171,6 @@ public final class WorldRenderer implements IGameObject {
     /* UPDATING */
     private final ChunkUpdateManager _chunkUpdateManager;
 
-    /* EVENTS */
-    private final WorldTimeEventManager _worldTimeEventManager;
-
     /* PHYSICS */
     private final BulletPhysicsRenderer _bulletRenderer;
 
@@ -202,31 +192,20 @@ public final class WorldRenderer implements IGameObject {
      * @param title The title/description of the world
      * @param seed  The seed string used to generate the terrain
      */
-    public WorldRenderer(String title, String seed, long time, EntityManager manager, LocalPlayerSystem localPlayerSystem) {
-        // TODO: Cleaner method for this?
-        File f = new File(PathManager.getInstance().getWorldSavePath(title), title + ".dat");
-        if (f.exists()) {
-            try {
-                chunkStore = ChunkStoreGZip.load(f);
-            } catch (IOException e) {
-                /* TODO: We really should expose this error via UI so player knows that there is an issue with their world
-                   (don't have the game continue or we risk overwriting their game)
-                 */
-                e.printStackTrace();
-            }
-        }
+    public WorldRenderer(SpoutWorld world, EntityManager manager, LocalPlayerSystem localPlayerSystem) {
+    	this.world = world;
+    	
         if (chunkStore == null) {
             chunkStore = new ChunkStoreGZip();
         }
-        _chunkProvider = new LocalChunkProvider(chunkStore, generatorManager); // FIXME teraspout - change this to only be a renderer
         EntityAwareWorldProvider entityWorldProvider = new EntityAwareWorldProvider(new WorldProviderCoreImpl(title, seed, time, _chunkProvider));
         CoreRegistry.put(BlockEntityRegistry.class, entityWorldProvider);
         CoreRegistry.get(ComponentSystemManager.class).register(entityWorldProvider, "engine:BlockEntityRegistry");
-        _worldProvider = new WorldProviderWrapper(entityWorldProvider);
-        _chunkTesselator = new ChunkTessellator(_worldProvider.getBiomeProvider());
+        
+        _chunkTesselator = new ChunkTessellator(world);
         _skysphere = new Skysphere(this);
-        _chunkUpdateManager = new ChunkUpdateManager(_chunkTesselator, _worldProvider);
-        _worldTimeEventManager = new WorldTimeEventManager(_worldProvider);
+        
+        _chunkUpdateManager = new ChunkUpdateManager(_chunkTesselator, world);
         _portalManager = new PortalManager(manager);
         _blockGrid = new BlockGrid();
         _bulletRenderer = new BulletPhysicsRenderer(this);

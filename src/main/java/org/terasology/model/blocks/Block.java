@@ -64,10 +64,6 @@ public class Block implements IGameObject {
 
     private static final EnumMap<Side, Float> DIRECTION_LIT_LEVEL = new EnumMap<Side, Float>(Side.class);
 
-    /* LUTs */
-    protected static BufferedImage _colorLut;
-    protected static BufferedImage _foliageLut;
-
     /**
      * Possible forms of blocks.
      */
@@ -92,12 +88,6 @@ public class Block implements IGameObject {
         DIRECTION_LIT_LEVEL.put(Side.BACK, 1.0f);
         DIRECTION_LIT_LEVEL.put(Side.LEFT, 0.75f);
         DIRECTION_LIT_LEVEL.put(Side.RIGHT, 0.75f);
-        try {
-            _colorLut = ImageIO.read(ResourceLoader.getResource("org/terasology/data/textures/grasscolor.png").openStream());
-            _foliageLut = ImageIO.read(ResourceLoader.getResource("org/terasology/data/textures/foliagecolor.png").openStream());
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, e.toString(), e);
-        }
     }
 
     /* PROPERTIES */
@@ -183,36 +173,6 @@ public class Block implements IGameObject {
     }
 
     /**
-     * Calculates the block color offset value for the given humidity and temperature.
-     *
-     * @param temp The temperature
-     * @param hum  The humidity
-     * @return The color value
-     */
-    public Vector4f calcColorForTemperatureAndHumidity(double temp, double hum) {
-        hum *= temp;
-        int rgbValue = _colorLut.getRGB((int) ((1.0 - temp) * 255.0), (int) ((1.0 - hum) * 255.0));
-
-        Color c = new Color(rgbValue);
-        return new Vector4f(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, 1.0f);
-    }
-
-    /**
-     * Calculates the foliage color for the given humidity and temperature.
-     *
-     * @param temp The temperature
-     * @param hum  The humidity
-     * @return The color value
-     */
-    public Vector4f calcFoliageColorForTemperatureAndHumidity(double temp, double hum) {
-        hum *= temp;
-        int rgbValue = _foliageLut.getRGB((int) ((1.0 - temp) * 255.0), (int) ((1.0 - hum) * 255.0));
-
-        Color c = new Color(rgbValue);
-        return new Vector4f(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, 1.0f);
-    }
-
-    /**
      * Calculates the color offset for a given block type and a specific
      * side of the block.
      *
@@ -221,16 +181,8 @@ public class Block implements IGameObject {
      * @param humidity    The humidity
      * @return The color offset
      */
-    public Vector4f calcColorOffsetFor(Side side, double temperature, double humidity) {
+    public Vector4f calcColorOffsetFor(Side side) {
         Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-        if (_affectedByLut.contains(side)) {
-            if (getColorSource() == COLOR_SOURCE.COLOR_LUT)
-                color.set(calcColorForTemperatureAndHumidity(temperature, humidity));
-            else if (getColorSource() == COLOR_SOURCE.FOLIAGE_LUT) {
-                color.set(calcFoliageColorForTemperatureAndHumidity(temperature, humidity));
-            }
-        }
 
         Vector4f colorOffset = _colorOffset.get(side);
         color.x *= colorOffset.x;
