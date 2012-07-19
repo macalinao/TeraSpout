@@ -58,6 +58,10 @@ import javax.vecmath.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
+import org.spout.api.Spout;
+import org.spout.api.generator.biome.Biome;
+import org.spout.api.geo.World;
+import org.spout.engine.world.SpoutChunk;
 import org.spout.engine.world.SpoutWorld;
 import org.terasology.componentSystem.RenderSystem;
 import org.terasology.componentSystem.controllers.LocalPlayerSystem;
@@ -75,19 +79,15 @@ import org.terasology.logic.manager.PathManager;
 import org.terasology.logic.manager.PortalManager;
 import org.terasology.logic.manager.PostProcessingRenderer;
 import org.terasology.logic.manager.ShaderManager;
-import org.terasology.logic.manager.WorldTimeEventManager;
 import org.terasology.logic.world.BlockEntityRegistry;
 import org.terasology.logic.world.Chunk;
 import org.terasology.logic.world.ChunkProvider;
 import org.terasology.logic.world.ChunkStore;
 import org.terasology.logic.world.EntityAwareWorldProvider;
-import org.terasology.logic.world.LocalChunkProvider;
 import org.terasology.logic.world.WorldBiomeProvider;
-import org.terasology.logic.world.WorldBiomeProviderImpl;
 import org.terasology.logic.world.WorldInfo;
 import org.terasology.logic.world.WorldProvider;
 import org.terasology.logic.world.WorldProviderCoreImpl;
-import org.terasology.logic.world.WorldProviderWrapper;
 import org.terasology.logic.world.WorldTimeEvent;
 import org.terasology.logic.world.WorldUtil;
 import org.terasology.logic.world.WorldView;
@@ -147,7 +147,7 @@ public final class WorldRenderer implements IGameObject {
     /* CHUNKS */
     private ChunkTessellator _chunkTesselator;
     private boolean _pendingChunks = false;
-    private final List<Chunk> _chunksInProximity = Lists.newArrayList();
+    private final List<SpoutChunk> _chunksInProximity = Lists.newArrayList();
     private int _chunkPosX, _chunkPosZ;
 
     /* RENDERING */
@@ -237,8 +237,8 @@ public final class WorldRenderer implements IGameObject {
                 _chunksInProximity.clear();
                 for (int x = -(viewingDistance / 2); x < viewingDistance / 2; x++) {
                     for (int z = -(viewingDistance / 2); z < viewingDistance / 2; z++) {
-                        Chunk c = _chunkProvider.getChunk(newChunkPosX + x, 0, newChunkPosZ + z);
-                        if (c != null && c.getChunkState() == Chunk.State.COMPLETE && _worldProvider.getWorldViewAround(c.getPos()) != null) {
+                        SpoutChunk c = world.getChunk(newChunkPosX + x, 0, newChunkPosZ + z);
+                        if (c != null) { // TODO make chunks wait for loading?
                             _chunksInProximity.add(c);
                         } else {
                             _pendingChunks = true;
@@ -258,7 +258,7 @@ public final class WorldRenderer implements IGameObject {
                 for (Rect2i r : removeRects) {
                     for (int x = r.minX(); x < r.maxX(); ++x) {
                         for (int y = r.minY(); y < r.maxY(); ++y) {
-                            Chunk c = _chunkProvider.getChunk(x, 0, y);
+                            SpoutChunk c = world.getChunk(x, 0, y);
                             _chunksInProximity.remove(c);
                         }
                     }
@@ -269,8 +269,8 @@ public final class WorldRenderer implements IGameObject {
                 for (Rect2i r : addRects) {
                     for (int x = r.minX(); x < r.maxX(); ++x) {
                         for (int y = r.minY(); y < r.maxY(); ++y) {
-                            Chunk c = _chunkProvider.getChunk(x, 0, y);
-                            if (c != null && c.getChunkState() == Chunk.State.COMPLETE && _worldProvider.getWorldViewAround(c.getPos()) != null) {
+                            SpoutChunk c = world.getChunk(x, 0, y);
+                            if (c != null) {
                                 _chunksInProximity.add(c);
                             } else {
                                 _pendingChunks = true;
@@ -292,10 +292,10 @@ public final class WorldRenderer implements IGameObject {
         return false;
     }
 
-    private static class ChunkProximityComparator implements Comparator<Chunk> {
+    private static class ChunkProximityComparator implements Comparator<SpoutChunk> {
 
         @Override
-        public int compare(Chunk o1, Chunk o2) {
+        public int compare(SpoutChunk o1, SpoutChunk o2) {
             double distance = distanceToCamera(o1);
             double distance2 = distanceToCamera(o2);
 
@@ -311,8 +311,8 @@ public final class WorldRenderer implements IGameObject {
             return distance2 > distance ? -1 : 1;
         }
 
-        private float distanceToCamera(Chunk chunk) {
-            Vector3f result = new Vector3f((chunk.getPos().x + 0.5f) * Chunk.SIZE_X, 0, (chunk.getPos().z + 0.5f) * Chunk.SIZE_Z);
+        private float distanceToCamera(SpoutChunk chunk) {
+            Vector3f result = new Vector3f((chunk.getX() + 0.5f) * Chunk.SIZE_X, 0, (chunk.getZ() + 0.5f) * Chunk.SIZE_Z);
 
             Vector3d cameraPos = CoreRegistry.get(WorldRenderer.class).getActiveCamera().getPosition();
             result.x -= cameraPos.x;
@@ -330,59 +330,6 @@ public final class WorldRenderer implements IGameObject {
     }
 
     /**
-     * Creates the world time events to play the game's soundtrack at specific times.
-     */
-    public void initTimeEvents() {
-        // SUNRISE
-        _worldTimeEventManager.addWorldTimeEvent(new WorldTimeEvent(0.1, true) {
-            @Override
-            public void run() {
-                AudioManager.playMusic("engine:Sunrise");
-            }
-        });
-
-        // AFTERNOON
-        _worldTimeEventManager.addWorldTimeEvent(new WorldTimeEvent(0.25, true) {
-            @Override
-            public void run() {
-                AudioManager.playMusic("engine:Afternoon");
-            }
-        });
-
-        // SUNSET
-        _worldTimeEventManager.addWorldTimeEvent(new WorldTimeEvent(0.4, true) {
-            @Override
-            public void run() {
-                AudioManager.playMusic("engine:Sunset");
-            }
-        });
-
-        // NIGHT
-        _worldTimeEventManager.addWorldTimeEvent(new WorldTimeEvent(0.6, true) {
-            @Override
-            public void run() {
-                AudioManager.playMusic("engine:Dimlight");
-            }
-        });
-
-        // NIGHT
-        _worldTimeEventManager.addWorldTimeEvent(new WorldTimeEvent(0.75, true) {
-            @Override
-            public void run() {
-                AudioManager.playMusic("engine:OtherSide");
-            }
-        });
-
-        // BEFORE SUNRISE
-        _worldTimeEventManager.addWorldTimeEvent(new WorldTimeEvent(0.9, true) {
-            @Override
-            public void run() {
-                AudioManager.playMusic("engine:Resurface");
-            }
-        });
-    }
-
-    /**
      * Updates the currently visible chunks (in sight of the player).
      */
     public void updateAndQueueVisibleChunks() {
@@ -391,7 +338,7 @@ public final class WorldRenderer implements IGameObject {
         _statIgnoredPhases = 0;
 
         for (int i = 0; i < _chunksInProximity.size(); i++) {
-            Chunk c = _chunksInProximity.get(i);
+            SpoutChunk c = _chunksInProximity.get(i);
             ChunkMesh[] mesh = c.getMesh();
 
             if (isChunkVisible(c) && isChunkValidForRender(c)) {
@@ -678,10 +625,10 @@ public final class WorldRenderer implements IGameObject {
     }
 
     public float getRenderingLightValueAt(Vector3f pos) {
-        float lightValueSun = _worldProvider.getSunlight(pos);
+        float lightValueSun = world.getBlockSkyLight((int) pos.x,(int)  pos.y, (int) pos.z) / 255f;
         lightValueSun /= 15.0f;
         lightValueSun *= getDaylight();
-        float lightValueBlock = _worldProvider.getLight(pos);
+        float lightValueBlock = world.getBlockLight((int) pos.x, (int) pos.y, (int) pos.z) / 255f;
         lightValueBlock /= 15f;
 
         return (float) TeraMath.clamp(lightValueSun + lightValueBlock * (1.0 - lightValueSun));
@@ -698,11 +645,6 @@ public final class WorldRenderer implements IGameObject {
         updateTick(delta);
         PerformanceMonitor.endActivity();
 
-        // Free unused space
-        PerformanceMonitor.startActivity("Update Chunk Cache");
-        _chunkProvider.update();
-        PerformanceMonitor.endActivity();
-
         PerformanceMonitor.startActivity("Update Close Chunks");
         updateChunksInProximity(false);
         PerformanceMonitor.endActivity();
@@ -714,12 +656,6 @@ public final class WorldRenderer implements IGameObject {
         if (_activeCamera != null) {
             _activeCamera.update(delta);
         }
-
-
-        // And finally fire any active events
-        PerformanceMonitor.startActivity("Fire Events");
-        _worldTimeEventManager.fireWorldTimeEvents();
-        PerformanceMonitor.endActivity();
 
         // Simulate world
         // TODO: Simulators
@@ -811,22 +747,6 @@ public final class WorldRenderer implements IGameObject {
     }
 
     /**
-     * Returns the maximum height at a given position.
-     *
-     * @param x The X-coordinate
-     * @param z The Z-coordinate
-     * @return The maximum height
-     */
-    public final int maxHeightAt(int x, int z) {
-        for (int y = Chunk.SIZE_Y - 1; y >= 0; y--) {
-            if (_worldProvider.getBlock(x, y, z).getId() != 0x0)
-                return y;
-        }
-
-        return 0;
-    }
-
-    /**
      * Chunk position of the player.
      *
      * @return The player offset on the x-axis
@@ -863,107 +783,12 @@ public final class WorldRenderer implements IGameObject {
         updateChunksInProximity(true);
     }
 
-    public ChunkProvider getChunkProvider() {
-        return _chunkProvider;
-    }
-
-    /**
-     * Creates the first Portal if it doesn't exist yet
-     */
-    public void initPortal() {
-        if (!_portalManager.hasPortal()) {
-            Vector3d loc = new Vector3d(getPlayerPosition().x, getPlayerPosition().y + 4, getPlayerPosition().z);
-            _logger.log(Level.INFO, "Portal location is" + loc);
-            Vector3i pos = new Vector3i((int) loc.x - 1, (int) loc.y, (int) loc.z);
-            while (true) {
-                Block oldBlock = _worldProvider.getBlock(pos);
-                if (_worldProvider.setBlock(pos, BlockManager.getInstance().getBlock("PortalBlock"), oldBlock)) {
-                    break;
-                }
-                // TODO: keep trying, but make sure chunk is loaded.
-                return;
-            }
-            _portalManager.addPortal(loc);
-        }
-    }
-
     /**
      * Disposes this world.
      */
     public void dispose() {
-        _worldProvider.dispose();
-        WorldInfo worldInfo = _worldProvider.getWorldInfo();
-        try {
-            WorldInfo.save(new File(PathManager.getInstance().getWorldSavePath(worldInfo.getTitle()), WorldInfo.DEFAULT_FILE_NAME), worldInfo);
-        } catch (IOException e) {
-            _logger.log(Level.SEVERE, "Failed to save world manifest");
-        }
-
         AudioManager.getInstance().stopAllSounds();
-
-        chunkStore.dispose();
-        // TODO: this should be elsewhere, perhaps within the chunk cache.
-        File chunkFile = new File(PathManager.getInstance().getWorldSavePath(_worldProvider.getTitle()), _worldProvider.getTitle() + ".dat");
-        try {
-            FileOutputStream fileOut = new FileOutputStream(chunkFile);
-            BufferedOutputStream bos = new BufferedOutputStream(fileOut);
-            ObjectOutputStream out = new ObjectOutputStream(bos);
-            out.writeObject(chunkStore);
-            out.close();
-            bos.flush();
-            bos.close();
-            fileOut.close();
-        } catch (IOException e) {
-            _logger.log(Level.SEVERE, "Error saving chunks", e);
-        }
-    }
-
-    /**
-     * @return true if pregeneration is complete
-     */
-    public boolean pregenerateChunks() {
-        boolean complete = true;
-        int newChunkPosX = calcCamChunkOffsetX();
-        int newChunkPosZ = calcCamChunkOffsetZ();
-        int viewingDistance = Config.getInstance().getActiveViewingDistance();
-
-        _chunkProvider.update();
-        for (Vector3i pos : Region3i.createFromCenterExtents(new Vector3i(newChunkPosX, 0, newChunkPosZ), new Vector3i(viewingDistance / 2, 0, viewingDistance / 2))) {
-            Chunk chunk = _chunkProvider.getChunk(pos);
-            if (chunk == null || chunk.getChunkState() != Chunk.State.COMPLETE) {
-                complete = false;
-                continue;
-            } else if (chunk.isDirty()) {
-                WorldView view = _worldProvider.getWorldViewAround(chunk.getPos());
-                if (view == null) {
-                    continue;
-                }
-                chunk.setDirty(false);
-
-                ChunkMesh[] newMeshes = new ChunkMesh[VERTICAL_SEGMENTS];
-                for (int seg = 0; seg < VERTICAL_SEGMENTS; seg++) {
-                    newMeshes[seg] = _chunkTesselator.generateMesh(view, chunk.getPos(), Chunk.SIZE_Y / VERTICAL_SEGMENTS, seg * (Chunk.SIZE_Y / VERTICAL_SEGMENTS));
-                }
-
-                chunk.setPendingMesh(newMeshes);
-
-                if (chunk.getPendingMesh() != null) {
-
-                    for (int j = 0; j < chunk.getPendingMesh().length; j++) {
-                        chunk.getPendingMesh()[j].generateVBOs();
-                    }
-                    if (chunk.getMesh() != null) {
-                        for (int j = 0; j < chunk.getMesh().length; j++) {
-                            chunk.getMesh()[j].dispose();
-                        }
-                    }
-                    chunk.setMesh(chunk.getPendingMesh());
-                    chunk.setPendingMesh(null);
-                }
-                return false;
-            }
-        }
-        return complete;
+        // TODO save world if it isn't saved already
     }
 
     public void printScreen() {
@@ -1006,7 +831,7 @@ public final class WorldRenderer implements IGameObject {
 
     @Override
     public String toString() {
-        return String.format("world (biome: %s, time: %.2f, exposure: %.2f, sun: %.2f, cache: %fMb, dirty: %d, ign: %d, vis: %d, tri: %d, empty: %d, !ready: %d, seed: \"%s\", title: \"%s\")", getPlayerBiome(), _worldProvider.getTimeInDays(), PostProcessingRenderer.getInstance().getExposure(), _skysphere.getSunPosAngle(), _chunkProvider.size(), _statDirtyChunks, _statIgnoredPhases, _statVisibleChunks, _statRenderedTriangles, _statChunkMeshEmpty, _statChunkNotReady, _worldProvider.getSeed(), _worldProvider.getTitle());
+        return String.format("world (biome: %s, time: %.2f, exposure: %.2f, sun: %.2f, cache: %fMb, dirty: %d, ign: %d, vis: %d, tri: %d, empty: %d, !ready: %d, seed: \"%s\", title: \"%s\")", getPlayerBiome(), world.getAge(), PostProcessingRenderer.getInstance().getExposure(), _skysphere.getSunPosAngle(), 10, _statDirtyChunks, _statIgnoredPhases, _statVisibleChunks, _statRenderedTriangles, _statChunkMeshEmpty, _statChunkNotReady, world.getSeed(), world.getName());
     }
 
     public LocalPlayer getPlayer() {
@@ -1018,7 +843,7 @@ public final class WorldRenderer implements IGameObject {
     }
 
     public boolean isChunkValidForRender(Chunk c) {
-        return _worldProvider.getWorldViewAround(c.getPos()) != null;
+        return true; // TODO wait for loading
     }
 
     public boolean isChunkVisible(Chunk c) {
@@ -1029,13 +854,13 @@ public final class WorldRenderer implements IGameObject {
         return _skysphere.getDaylight();
     }
 
-    public WorldBiomeProvider.Biome getPlayerBiome() {
+    public Biome getPlayerBiome() {
         Vector3f pos = getPlayerPosition();
-        return _worldProvider.getBiomeProvider().getBiomeAt(pos.x, pos.z);
+        return world.getBiomeType((int) pos.x, (int) pos.y, (int) pos.z);
     }
 
-    public WorldProvider getWorldProvider() {
-        return _worldProvider;
+    public World getWorldProvider() {
+        return world;
     }
 
     public BlockGrid getBlockGrid() {
@@ -1050,7 +875,7 @@ public final class WorldRenderer implements IGameObject {
         return _tick;
     }
 
-    public List<Chunk> getChunksInProximity() {
+    public List<SpoutChunk> getChunksInProximity() {
         return _chunksInProximity;
     }
 
