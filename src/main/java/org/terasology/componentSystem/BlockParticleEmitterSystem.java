@@ -200,7 +200,7 @@ public class BlockParticleEmitterSystem implements RenderSystem {
 
         ShaderProgram shader = ShaderManager.getInstance().getShaderProgram("particle");
 
-        Vector4f color = BlockManager.getInstance().getBlock(blockType).calcColorOffsetFor(Side.FRONT, temperature, humidity);
+        Vector4f color = BlockManager.getInstance().getBlock(blockType).calcColorOffsetFor(Side.FRONT);
         shader.setFloat3("colorOffset", color.x, color.y, color.z);
         shader.setFloat("texOffsetX", particle.texOffset.x);
         shader.setFloat("texOffsetY", particle.texOffset.y);

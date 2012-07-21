@@ -25,8 +25,6 @@ import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glViewport;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -37,13 +35,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 import org.lwjgl.LWJGLException;
-import org.lwjgl.LWJGLUtil;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
@@ -71,6 +66,7 @@ import org.terasology.model.blocks.management.BlockManager;
 import org.terasology.model.blocks.management.BlockManifestor;
 import org.terasology.model.shapes.BlockShapeManager;
 import org.terasology.performanceMonitor.PerformanceMonitor;
+import org.terasology.teraspout.TeraSpout;
 
 import com.google.common.collect.Lists;
 
@@ -87,9 +83,21 @@ public class TerasologyEngine extends SpoutClient {
     private GameState state;
     private Timer timer;
     private final ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
-
+    private final TeraSpout teraspout;
+    private Logger logger = super.getLogger();
+    
     public TerasologyEngine() {
     	super();
+    	this.teraspout = new TeraSpout(this);
+    }
+    
+    /**
+     * Gets the TeraSpout instance.
+     * 
+     * @return
+     */
+    public TeraSpout getTeraSpout() {
+    	return teraspout;
     }
     
     @Override

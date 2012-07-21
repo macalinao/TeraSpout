@@ -21,6 +21,7 @@ import org.terasology.math.TeraMath;
 import org.terasology.math.Vector3i;
 import org.terasology.model.blocks.Block;
 import org.terasology.model.blocks.management.BlockManager;
+import org.terasology.teraspout.TeraChunk;
 
 import java.util.logging.Logger;
 
@@ -33,7 +34,7 @@ public class WorldView {
     private Vector3i offset;
     private Region3i chunkRegion;
     private Region3i blockRegion;
-    private Chunk[] chunks;
+    private TeraChunk[] chunks;
 
     private Vector3i chunkPower;
     private Vector3i chunkSize;
@@ -50,9 +51,9 @@ public class WorldView {
     }
 
     public static WorldView createWorldView(Region3i region, Vector3i offset, ChunkProvider chunkProvider) {
-        Chunk[] chunks = new Chunk[region.size().x * region.size().z];
+        TeraChunk[] chunks = new TeraChunk[region.size().x * region.size().z];
         for (Vector3i chunkPos : region) {
-            Chunk chunk = chunkProvider.getChunk(chunkPos);
+            TeraChunk chunk = chunkProvider.getChunk(chunkPos);
             if (chunk == null) {
                 return null;
             }
@@ -62,11 +63,11 @@ public class WorldView {
         return new WorldView(chunks, region, offset);
     }
 
-    public WorldView(Chunk[] chunks, Region3i chunkRegion, Vector3i offset) {
+    public WorldView(TeraChunk[] chunks, Region3i chunkRegion, Vector3i offset) {
         this.chunkRegion = chunkRegion;
         this.chunks = chunks;
         this.offset = offset;
-        setChunkSize(new Vector3i(Chunk.SIZE_X, Chunk.SIZE_Y, Chunk.SIZE_Z));
+        setChunkSize(new Vector3i(TeraChunk.SIZE_X, TeraChunk.SIZE_Y, TeraChunk.SIZE_Z));
     }
 
     public Region3i getChunkRegion() {
@@ -181,19 +182,19 @@ public class WorldView {
     }
 
     public void lock() {
-        for (Chunk chunk : chunks) {
+        for (TeraChunk chunk : chunks) {
             chunk.lock();
         }
     }
 
     public void unlock() {
-        for (Chunk chunk : chunks) {
+        for (TeraChunk chunk : chunks) {
             chunk.unlock();
         }
     }
 
     public boolean isValidView() {
-        for (Chunk chunk : chunks) {
+        for (TeraChunk chunk : chunks) {
             if (chunk.isDisposed()) {
                 return false;
             }

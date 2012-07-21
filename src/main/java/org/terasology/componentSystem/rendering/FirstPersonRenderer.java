@@ -158,7 +158,7 @@ public class FirstPersonRenderer implements RenderSystem {
 
         // Apply biome and overall color offset
         // TODO: Should get temperature, etc from world provider
-        Vector4f color = activeBlock.calcColorOffsetFor(Side.FRONT, worldProvider.getBiomeProvider().getTemperatureAt(TeraMath.floorToInt(playerPos.x), TeraMath.floorToInt(playerPos.z)), worldProvider.getBiomeProvider().getHumidityAt(TeraMath.floorToInt(playerPos.x), TeraMath.floorToInt(playerPos.z)));
+        Vector4f color = activeBlock.calcColorOffsetFor(Side.FRONT);
         shader.setFloat3("colorOffset", color.x, color.y, color.z);
 
         glEnable(GL11.GL_BLEND);

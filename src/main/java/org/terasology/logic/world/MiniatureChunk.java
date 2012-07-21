@@ -26,6 +26,7 @@ import org.terasology.model.structures.AABB;
 import org.terasology.model.structures.TeraArray;
 import org.terasology.model.structures.TeraSmartArray;
 import org.terasology.rendering.primitives.ChunkMesh;
+import org.terasology.teraspout.TeraChunk;
 
 import javax.vecmath.Vector3d;
 import java.io.Externalizable;
@@ -44,7 +45,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author Benjamin Glatzel <benjamin.glatzel@me.com>
  */
-public class MiniatureChunk extends Chunk {
+public class MiniatureChunk extends TeraChunk {
     public static final int SIZE_X = 512;
     public static final int SIZE_Y = 256;
     public static final int SIZE_Z = 512;

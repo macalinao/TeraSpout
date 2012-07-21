@@ -17,14 +17,15 @@
 package org.terasology.logic.world;
 
 import org.terasology.math.Vector3i;
+import org.terasology.teraspout.TeraChunk;
 
 /**
  * @author Immortius
  */
 public interface ChunkStore {
-    public Chunk get(Vector3i position);
+    public TeraChunk get(Vector3i position);
 
-    public void put(Chunk c);
+    public void put(TeraChunk c);
 
     public boolean contains(Vector3i position);
 

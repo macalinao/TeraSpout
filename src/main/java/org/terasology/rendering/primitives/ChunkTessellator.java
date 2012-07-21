@@ -23,7 +23,6 @@ import gnu.trove.iterator.TIntIterator;
 import gnu.trove.iterator.TShortIterator;
 import org.lwjgl.BufferUtils;
 import org.spout.engine.world.SpoutWorld;
-import org.terasology.logic.world.Chunk;
 import org.terasology.logic.world.MiniatureChunk;
 import org.terasology.logic.world.WorldBiomeProvider;
 import org.terasology.logic.world.WorldView;
@@ -32,6 +31,7 @@ import org.terasology.math.Side;
 import org.terasology.math.Vector3i;
 import org.terasology.model.blocks.Block;
 import org.terasology.performanceMonitor.PerformanceMonitor;
+import org.terasology.teraspout.TeraChunk;
 
 import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
@@ -57,10 +57,10 @@ public final class ChunkTessellator {
         PerformanceMonitor.startActivity("GenerateMesh");
         ChunkMesh mesh = new ChunkMesh();
 
-        Vector3i chunkOffset = new Vector3i(chunkPos.x * Chunk.SIZE_X, chunkPos.y * Chunk.SIZE_Y, chunkPos.z * Chunk.SIZE_Z);
+        Vector3i chunkOffset = new Vector3i(chunkPos.x * TeraChunk.SIZE_X, chunkPos.y * TeraChunk.SIZE_Y, chunkPos.z * TeraChunk.SIZE_Z);
 
-        for (int x = 0; x < Chunk.SIZE_X; x++) {
-            for (int z = 0; z < Chunk.SIZE_Z; z++) {
+        for (int x = 0; x < TeraChunk.SIZE_X; x++) {
+            for (int z = 0; z < TeraChunk.SIZE_Z; z++) {
 //                float biomeTemp = biomeProvider.getTemperatureAt(chunkOffset.x + x, chunkOffset.z + z);
 //                float biomeHumidity = biomeProvider.getHumidityAt(chunkOffset.x + x, chunkOffset.z + z);
 

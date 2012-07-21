@@ -15,6 +15,7 @@
  */
 package org.terasology.rendering.physics;
 
+import com.beust.jcommander.internal.Lists;
 import com.bulletphysics.collision.broadphase.BroadphaseInterface;
 import com.bulletphysics.collision.broadphase.DbvtBroadphase;
 import com.bulletphysics.collision.dispatch.CollisionDispatcher;
@@ -47,12 +48,12 @@ import org.terasology.game.CoreRegistry;
 import org.terasology.game.Timer;
 import org.terasology.logic.LocalPlayer;
 import org.terasology.logic.manager.AudioManager;
-import org.terasology.logic.world.Chunk;
 import org.terasology.model.blocks.Block;
 import org.terasology.model.blocks.management.BlockManager;
 import org.terasology.rendering.interfaces.IGameObject;
 import org.terasology.rendering.primitives.ChunkMesh;
 import org.terasology.rendering.world.WorldRenderer;
+import org.terasology.teraspout.TeraChunk;
 import org.terasology.utilities.FastRandom;
 
 import javax.vecmath.Matrix3f;
@@ -225,12 +226,13 @@ public class BulletPhysicsRenderer implements IGameObject {
     }
 
     public void updateChunks() {
-        List<Chunk> chunks = CoreRegistry.get(WorldRenderer.class).getChunksInProximity();
+//        List<TeraChunk> chunks = CoreRegistry.get(WorldRenderer.class).getChunksInProximity();
+        List<TeraChunk> chunks = Lists.newArrayList(); // TODO
         HashSet<RigidBody> newBodies = new HashSet<RigidBody>();
         boolean updatedThisFrame = false;
 
         for (int i = 0; i < 32 && i < chunks.size(); i++) {
-            final Chunk chunk = chunks.get(i);
+            final TeraChunk chunk = chunks.get(i);
             if (chunk != null) {
                 if (!updatedThisFrame && updateRigidBody(chunk)) {
                     updatedThisFrame = true;
@@ -252,7 +254,7 @@ public class BulletPhysicsRenderer implements IGameObject {
         _chunks = newBodies;
     }
 
-    private boolean updateRigidBody(Chunk chunk) {
+    private boolean updateRigidBody(TeraChunk chunk) {
         if (chunk.getRigidBody() != null || chunk.getMesh() == null)
             return false;
 
@@ -261,7 +263,7 @@ public class BulletPhysicsRenderer implements IGameObject {
 
         int tris = 0;
         ChunkMesh[] meshes = chunk.getMesh();
-        for (int k = 0; k < Chunk.VERTICAL_SEGMENTS; k++) {
+        for (int k = 0; k < TeraChunk.VERTICAL_SEGMENTS; k++) {
             ChunkMesh mesh = meshes[k];
 
             if (mesh != null) {
@@ -287,7 +289,7 @@ public class BulletPhysicsRenderer implements IGameObject {
             Matrix3f rot = new Matrix3f();
             rot.setIdentity();
 
-            DefaultMotionState blockMotionState = new DefaultMotionState(new Transform(new Matrix4f(rot, new Vector3f((float) chunk.getPos().x * Chunk.SIZE_X, (float) chunk.getPos().y * Chunk.SIZE_Y, (float) chunk.getPos().z * Chunk.SIZE_Z), 1.0f)));
+            DefaultMotionState blockMotionState = new DefaultMotionState(new Transform(new Matrix4f(rot, new Vector3f((float) chunk.getPos().x * TeraChunk.SIZE_X, (float) chunk.getPos().y * TeraChunk.SIZE_Y, (float) chunk.getPos().z * TeraChunk.SIZE_Z), 1.0f)));
 
             RigidBodyConstructionInfo blockConsInf = new RigidBodyConstructionInfo(0, blockMotionState, shape, new Vector3f());
             RigidBody rigidBody = new RigidBody(blockConsInf);

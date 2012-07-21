@@ -18,6 +18,7 @@ package org.terasology.logic.world;
 
 import org.terasology.entitySystem.EntityRef;
 import org.terasology.math.Vector3i;
+import org.terasology.teraspout.TeraChunk;
 
 /**
  * @author Immortius
@@ -58,9 +59,9 @@ public interface ChunkProvider {
      * @param z The chunk position on the z-axis
      * @return The chunk, or null if it cannot be obtained
      */
-    public Chunk getChunk(int x, int y, int z);
+    public TeraChunk getChunk(int x, int y, int z);
 
-    public Chunk getChunk(Vector3i chunkPos);
+    public TeraChunk getChunk(Vector3i chunkPos);
 
     /**
      * Disposes all chunks managed by this chunk provider.

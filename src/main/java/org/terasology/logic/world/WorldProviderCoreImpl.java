@@ -24,6 +24,7 @@ import org.terasology.math.TeraMath;
 import org.terasology.math.Vector3i;
 import org.terasology.model.blocks.Block;
 import org.terasology.model.blocks.management.BlockManager;
+import org.terasology.teraspout.TeraChunk;
 
 /**
  * @author Immortius
@@ -112,7 +113,7 @@ public class WorldProviderCoreImpl implements WorldProviderCore {
         Vector3i blockPos = new Vector3i(x, y, z);
         WorldView worldView;
         if (type.isTranslucent() != oldType.isTranslucent() || type.getLuminance() != oldType.getLuminance()) {
-            worldView = WorldView.createSubview(blockPos, Chunk.MAX_LIGHT + 1, chunkProvider);
+            worldView = WorldView.createSubview(blockPos, TeraChunk.MAX_LIGHT + 1, chunkProvider);
         } else {
             worldView = WorldView.createSubview(blockPos, 1, chunkProvider);
         }
@@ -140,7 +141,7 @@ public class WorldProviderCoreImpl implements WorldProviderCore {
     @Override
     public boolean setState(int x, int y, int z, byte state, byte oldState) {
         Vector3i chunkPos = TeraMath.calcChunkPos(x, y, z);
-        Chunk chunk = chunkProvider.getChunk(chunkPos);
+        TeraChunk chunk = chunkProvider.getChunk(chunkPos);
         if (chunk != null) {
             Vector3i blockPos = TeraMath.calcBlockPos(x, y, z);
             return chunk.setState(blockPos, state, oldState);
@@ -150,10 +151,10 @@ public class WorldProviderCoreImpl implements WorldProviderCore {
 
     @Override
     public byte getState(int x, int y, int z) {
-        y = TeraMath.clamp(y, 0, Chunk.SIZE_Y - 1);
+        y = TeraMath.clamp(y, 0, TeraChunk.SIZE_Y - 1);
 
         Vector3i chunkPos = TeraMath.calcChunkPos(x, y, z);
-        Chunk chunk = chunkProvider.getChunk(chunkPos);
+        TeraChunk chunk = chunkProvider.getChunk(chunkPos);
         if (chunk != null) {
             Vector3i blockPos = TeraMath.calcBlockPos(x, y, z);
             return chunk.getState(blockPos);
@@ -163,12 +164,12 @@ public class WorldProviderCoreImpl implements WorldProviderCore {
 
     @Override
     public Block getBlock(int x, int y, int z) {
-        if (y >= Chunk.SIZE_Y || y < 0) {
+        if (y >= TeraChunk.SIZE_Y || y < 0) {
             return BlockManager.getInstance().getAir();
         }
 
         Vector3i chunkPos = TeraMath.calcChunkPos(x, y, z);
-        Chunk chunk = chunkProvider.getChunk(chunkPos);
+        TeraChunk chunk = chunkProvider.getChunk(chunkPos);
         if (chunk != null) {
             Vector3i blockPos = TeraMath.calcBlockPos(x, y, z);
             return chunk.getBlock(blockPos);
@@ -178,10 +179,10 @@ public class WorldProviderCoreImpl implements WorldProviderCore {
 
     @Override
     public byte getLight(int x, int y, int z) {
-        y = TeraMath.clamp(y, 0, Chunk.SIZE_Y - 1);
+        y = TeraMath.clamp(y, 0, TeraChunk.SIZE_Y - 1);
 
         Vector3i chunkPos = TeraMath.calcChunkPos(x, y, z);
-        Chunk chunk = chunkProvider.getChunk(chunkPos);
+        TeraChunk chunk = chunkProvider.getChunk(chunkPos);
         if (chunk != null) {
             Vector3i blockPos = TeraMath.calcBlockPos(x, y, z);
             return chunk.getLight(blockPos);
@@ -191,10 +192,10 @@ public class WorldProviderCoreImpl implements WorldProviderCore {
 
     @Override
     public byte getSunlight(int x, int y, int z) {
-        y = TeraMath.clamp(y, 0, Chunk.SIZE_Y - 1);
+        y = TeraMath.clamp(y, 0, TeraChunk.SIZE_Y - 1);
 
         Vector3i chunkPos = TeraMath.calcChunkPos(x, y, z);
-        Chunk chunk = chunkProvider.getChunk(chunkPos);
+        TeraChunk chunk = chunkProvider.getChunk(chunkPos);
         if (chunk != null) {
             Vector3i blockPos = TeraMath.calcBlockPos(x, y, z);
             return chunk.getSunlight(blockPos);
@@ -204,10 +205,10 @@ public class WorldProviderCoreImpl implements WorldProviderCore {
 
     @Override
     public byte getTotalLight(int x, int y, int z) {
-        y = TeraMath.clamp(y, 0, Chunk.SIZE_Y - 1);
+        y = TeraMath.clamp(y, 0, TeraChunk.SIZE_Y - 1);
 
         Vector3i chunkPos = TeraMath.calcChunkPos(x, y, z);
-        Chunk chunk = chunkProvider.getChunk(chunkPos);
+        TeraChunk chunk = chunkProvider.getChunk(chunkPos);
         if (chunk != null) {
             Vector3i blockPos = TeraMath.calcBlockPos(x, y, z);
             return (byte) Math.max(chunk.getSunlight(blockPos), chunk.getLight(blockPos));

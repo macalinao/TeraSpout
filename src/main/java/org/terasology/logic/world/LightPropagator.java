@@ -22,6 +22,7 @@ import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.Vector3i;
 import org.terasology.model.blocks.Block;
+import org.terasology.teraspout.TeraChunk;
 
 import java.util.Collection;
 import java.util.List;
@@ -46,17 +47,17 @@ public class LightPropagator {
      * This expects the light propagator to be set up with a 3x3 world view offset so the center chunk is accessed as(0,0,0)
      */
     public void propagateOutOfTargetChunk() {
-        int maxX = Chunk.SIZE_X - 1;
-        int maxZ = Chunk.SIZE_Z - 1;
+        int maxX = TeraChunk.SIZE_X - 1;
+        int maxZ = TeraChunk.SIZE_Z - 1;
         // Iterate over the blocks on the horizontal sides
-        for (int y = 0; y < Chunk.SIZE_Y; y++) {
-            for (int x = 0; x < Chunk.SIZE_X; x++) {
+        for (int y = 0; y < TeraChunk.SIZE_Y; y++) {
+            for (int x = 0; x < TeraChunk.SIZE_X; x++) {
                 propagateSunlightFrom(x, y, 0, Side.FRONT);
                 propagateSunlightFrom(x, y, maxZ, Side.BACK);
                 propagateLightFrom(x, y, 0, Side.FRONT);
                 propagateLightFrom(x, y, maxZ, Side.BACK);
             }
-            for (int z = 0; z < Chunk.SIZE_Z; z++) {
+            for (int z = 0; z < TeraChunk.SIZE_Z; z++) {
                 propagateSunlightFrom(0, y, z, Side.LEFT);
                 propagateSunlightFrom(maxX, y, z, Side.RIGHT);
                 propagateLightFrom(0, y, z, Side.LEFT);
@@ -132,8 +133,8 @@ public class LightPropagator {
 
     private byte pullSunlight(int x, int y, int z) {
         byte light = 0;
-        if (y == Chunk.SIZE_Y - 1) {
-            light = Chunk.MAX_LIGHT;
+        if (y == TeraChunk.SIZE_Y - 1) {
+            light = TeraChunk.MAX_LIGHT;
         } else {
             light = (byte) Math.max(light, worldView.getSunlight(x, y + 1, z));
             light = (byte) Math.max(light, worldView.getSunlight(x, y - 1, z) - 1);
@@ -159,7 +160,7 @@ public class LightPropagator {
         Collection<Vector3i> nextWave = Lists.newArrayList();
         nextWave.add(new Vector3i(x, y, z));
         // First drop MAX_LIGHT until it is blocked
-        if (lightLevel == Chunk.MAX_LIGHT && worldView.getSunlight(x, y - 1, z) < Chunk.MAX_LIGHT) {
+        if (lightLevel == TeraChunk.MAX_LIGHT && worldView.getSunlight(x, y - 1, z) < TeraChunk.MAX_LIGHT) {
             for (int columnY = y - 1; columnY >= 0; columnY--) {
                 Block block = worldView.getBlock(x, columnY, z);
                 if (sunlightRetainsFullStrengthIn(block)) {
@@ -180,10 +181,10 @@ public class LightPropagator {
             nextWave.clear();
 
             // Only move sunlight up if it is below max light
-            if (lightLevel < Chunk.MAX_LIGHT) {
+            if (lightLevel < TeraChunk.MAX_LIGHT) {
                 for (Vector3i pos : currentWave) {
                     // Move sunlight up
-                    if (pos.y < Chunk.SIZE_Y - 2) {
+                    if (pos.y < TeraChunk.SIZE_Y - 2) {
                         Vector3i adjPos = new Vector3i(pos.x, pos.y + 1, pos.z);
                         Block block = worldView.getBlock(adjPos);
                         if (block.isTranslucent()) {
@@ -256,7 +257,7 @@ public class LightPropagator {
                 for (Side side : Side.values()) {
                     Vector3i adjPos = new Vector3i(pos);
                     adjPos.add(side.getVector3i());
-                    if (adjPos.y < 0 || adjPos.y >= Chunk.SIZE_Y) {
+                    if (adjPos.y < 0 || adjPos.y >= TeraChunk.SIZE_Y) {
                         continue;
                     }
 
@@ -278,11 +279,11 @@ public class LightPropagator {
 
     private Region3i clearSunlight(int x, int y, int z) {
         byte oldSunlight = worldView.getSunlight(x, y, z);
-        if (oldSunlight == Chunk.MAX_LIGHT) {
+        if (oldSunlight == TeraChunk.MAX_LIGHT) {
             //logger.log(Level.INFO, "Full Recalculating sunlight");
             worldView.setSunlight(x, y, z, (byte) 0);
             fullRecalculateSunlightAround(x, y, z);
-            return Region3i.createFromMinAndSize(new Vector3i(x - Chunk.MAX_LIGHT + 1, 0, z - Chunk.MAX_LIGHT + 1), new Vector3i(2 * Chunk.MAX_LIGHT - 1, Chunk.SIZE_Y, 2 * Chunk.MAX_LIGHT - 1));
+            return Region3i.createFromMinAndSize(new Vector3i(x - TeraChunk.MAX_LIGHT + 1, 0, z - TeraChunk.MAX_LIGHT + 1), new Vector3i(2 * TeraChunk.MAX_LIGHT - 1, TeraChunk.SIZE_Y, 2 * TeraChunk.MAX_LIGHT - 1));
         } else if (oldSunlight > 1) {
             //logger.log(Level.INFO, "Local Recalculating sunlight");
             localRecalculateSunlightAround(x, y, z, oldSunlight);
@@ -337,8 +338,8 @@ public class LightPropagator {
     }
 
     private void fullRecalculateSunlightAround(int blockX, int blockY, int blockZ) {
-        int top = Math.min(Chunk.SIZE_Y - 2, blockY + Chunk.MAX_LIGHT - 2);
-        Region3i region = Region3i.createFromMinMax(new Vector3i(blockX - Chunk.MAX_LIGHT + 1, 0, blockZ - Chunk.MAX_LIGHT + 1), new Vector3i(blockX + Chunk.MAX_LIGHT - 1, top, blockZ + Chunk.MAX_LIGHT - 1));
+        int top = Math.min(TeraChunk.SIZE_Y - 2, blockY + TeraChunk.MAX_LIGHT - 2);
+        Region3i region = Region3i.createFromMinMax(new Vector3i(blockX - TeraChunk.MAX_LIGHT + 1, 0, blockZ - TeraChunk.MAX_LIGHT + 1), new Vector3i(blockX + TeraChunk.MAX_LIGHT - 1, top, blockZ + TeraChunk.MAX_LIGHT - 1));
         short[] tops = new short[region.size().x * region.size().z];
 
         // Tunnel light down
@@ -346,11 +347,11 @@ public class LightPropagator {
             for (int z = 0; z < region.size().z; z++) {
                 int y = top;
                 byte aboveLight = worldView.getSunlight(x + region.min().x, y + 1, z + region.min().z);
-                if (aboveLight == Chunk.MAX_LIGHT) {
+                if (aboveLight == TeraChunk.MAX_LIGHT) {
                     for (; y >= 0; y--) {
                         Block block = worldView.getBlock(x + region.min().x, y, z + region.min().z);
                         if (sunlightRetainsFullStrengthIn(block)) {
-                            worldView.setSunlight(x + region.min().x, y, z + region.min().z, Chunk.MAX_LIGHT);
+                            worldView.setSunlight(x + region.min().x, y, z + region.min().z, TeraChunk.MAX_LIGHT);
                         } else {
                             break;
                         }

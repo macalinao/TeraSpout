@@ -58,7 +58,6 @@ import org.terasology.logic.LocalPlayer;
 import org.terasology.logic.manager.AssetManager;
 import org.terasology.logic.manager.GUIManager;
 import org.terasology.logic.manager.PathManager;
-import org.terasology.logic.world.Chunk;
 import org.terasology.logic.world.WorldProvider;
 import org.terasology.math.Vector3i;
 import org.terasology.model.blocks.management.BlockManager;
@@ -69,6 +68,7 @@ import org.terasology.rendering.gui.menus.UILoadingScreen;
 import org.terasology.rendering.gui.menus.UIStatusScreen;
 import org.terasology.rendering.physics.BulletPhysicsRenderer;
 import org.terasology.rendering.world.WorldRenderer;
+import org.terasology.teraspout.TeraChunk;
 import org.terasology.utilities.FastRandom;
 
 /**
@@ -255,8 +255,7 @@ public class StateSinglePlayer extends GameState {
         logger.log(Level.INFO, "Creating new World with seed \"{0}\"", seed);
 
         // Init. a new world
-        worldRenderer = new WorldRenderer(title, seed, time, entityManager, localPlayerSys);
-        CoreRegistry.put(WorldRenderer.class, worldRenderer);
+        // TODO
 
         File entityDataFile = new File(PathManager.getInstance().getWorldSavePath(title), ENTITY_DATA_FILE);
         entityManager.clear();
@@ -269,7 +268,6 @@ public class StateSinglePlayer extends GameState {
         }
 
         CoreRegistry.put(WorldRenderer.class, worldRenderer);
-        CoreRegistry.put(WorldProvider.class, worldRenderer.getWorldProvider());
         CoreRegistry.put(LocalPlayer.class, new LocalPlayer(EntityRef.NULL));
         CoreRegistry.put(Camera.class, worldRenderer.getActiveCamera());
         CoreRegistry.put(BulletPhysicsRenderer.class, worldRenderer.getBulletRenderer());
@@ -316,58 +314,56 @@ public class StateSinglePlayer extends GameState {
 
     // TODO: Maybe should have its own state?
     private void prepareWorld() {
-        UILoadingScreen loadingScreen = GUIManager.getInstance().addWindow(new UILoadingScreen(), "engine:loadingScreen");
-        Display.update();
-
-        int chunksGenerated = 0;
-
-        Timer timer = CoreRegistry.get(Timer.class);
-        long startTime = timer.getTimeInMs();
-
-        Iterator<EntityRef> iterator = entityManager.iteratorEntities(LocalPlayerComponent.class).iterator();
-        if (iterator.hasNext()) {
-            CoreRegistry.get(LocalPlayer.class).setEntity(iterator.next());
-            worldRenderer.setPlayer(CoreRegistry.get(LocalPlayer.class));
-        } else {
-            // Load spawn zone so player spawn location can be determined
-            EntityRef spawnZoneEntity = entityManager.create();
-            spawnZoneEntity.addComponent(new LocationComponent(new Vector3f(Chunk.SIZE_X / 2, Chunk.SIZE_Y / 2, Chunk.SIZE_Z / 2)));
-            worldRenderer.getChunkProvider().addRegionEntity(spawnZoneEntity, 1);
-
-            while (!worldRenderer.getWorldProvider().isBlockActive(new Vector3i(Chunk.SIZE_X / 2, Chunk.SIZE_Y / 2, Chunk.SIZE_Z / 2))) {
-                loadingScreen.updateStatus(String.format("Loading spawn area... %.2f%%! :-)", (timer.getTimeInMs() - startTime) / 50.0f));
-
-                renderUserInterface();
-                updateUserInterface();
-                Display.update();
-            }
-
-            Vector3i spawnPoint = new Vector3i(Chunk.SIZE_X / 2, Chunk.SIZE_Y, Chunk.SIZE_Z / 2);
-            while (worldRenderer.getWorldProvider().getBlock(spawnPoint) == BlockManager.getInstance().getAir() && spawnPoint.y > 0) {
-                spawnPoint.y--;
-            }
-
-            PlayerFactory playerFactory = new PlayerFactory(entityManager);
-            CoreRegistry.get(LocalPlayer.class).setEntity(playerFactory.newInstance(new Vector3f(spawnPoint.x + 0.5f, spawnPoint.y + 2.0f, spawnPoint.z + 0.5f)));
-            worldRenderer.setPlayer(CoreRegistry.get(LocalPlayer.class));
-            worldRenderer.getChunkProvider().removeRegionEntity(spawnZoneEntity);
-            spawnZoneEntity.destroy();
-        }
-
-        while (!getWorldRenderer().pregenerateChunks() && timer.getTimeInMs() - startTime < 5000) {
-            chunksGenerated++;
-
-            loadingScreen.updateStatus(String.format("Fast forwarding world... %.2f%%! :-)", (timer.getTimeInMs() - startTime) / 50.0f));
-
-            renderUserInterface();
-            updateUserInterface();
-            Display.update();
-        }
-
-        GUIManager.getInstance().removeWindow(loadingScreen);
-
-        // Create the first Portal if it doesn't exist yet
-        worldRenderer.initPortal();
+    	// TODO get rid of this
+//        UILoadingScreen loadingScreen = GUIManager.getInstance().addWindow(new UILoadingScreen(), "engine:loadingScreen");
+//        Display.update();
+//
+//        int chunksGenerated = 0;
+//
+//        Timer timer = CoreRegistry.get(Timer.class);
+//        long startTime = timer.getTimeInMs();
+//
+//        Iterator<EntityRef> iterator = entityManager.iteratorEntities(LocalPlayerComponent.class).iterator();
+//        if (iterator.hasNext()) {
+//            CoreRegistry.get(LocalPlayer.class).setEntity(iterator.next());
+//            worldRenderer.setPlayer(CoreRegistry.get(LocalPlayer.class));
+//        } else {
+//            // Load spawn zone so player spawn location can be determined
+//            EntityRef spawnZoneEntity = entityManager.create();
+//            spawnZoneEntity.addComponent(new LocationComponent(new Vector3f(TeraChunk.SIZE_X / 2, TeraChunk.SIZE_Y / 2, TeraChunk.SIZE_Z / 2)));
+//            worldRenderer.getChunkProvider().addRegionEntity(spawnZoneEntity, 1);
+//
+//            while (!worldRenderer.getWorldProvider().isBlockActive(new Vector3i(TeraChunk.SIZE_X / 2, TeraChunk.SIZE_Y / 2, TeraChunk.SIZE_Z / 2))) {
+//                loadingScreen.updateStatus(String.format("Loading spawn area... %.2f%%! :-)", (timer.getTimeInMs() - startTime) / 50.0f));
+//
+//                renderUserInterface();
+//                updateUserInterface();
+//                Display.update();
+//            }
+//
+//            Vector3i spawnPoint = new Vector3i(TeraChunk.SIZE_X / 2, TeraChunk.SIZE_Y, TeraChunk.SIZE_Z / 2);
+//            while (worldRenderer.getWorldProvider().getBlock(spawnPoint) == BlockManager.getInstance().getAir() && spawnPoint.y > 0) {
+//                spawnPoint.y--;
+//            }
+//
+//            PlayerFactory playerFactory = new PlayerFactory(entityManager);
+//            CoreRegistry.get(LocalPlayer.class).setEntity(playerFactory.newInstance(new Vector3f(spawnPoint.x + 0.5f, spawnPoint.y + 2.0f, spawnPoint.z + 0.5f)));
+//            worldRenderer.setPlayer(CoreRegistry.get(LocalPlayer.class));
+//            worldRenderer.getChunkProvider().removeRegionEntity(spawnZoneEntity);
+//            spawnZoneEntity.destroy();
+//        }
+//
+//        while (!getWorldRenderer().pregenerateChunks() && timer.getTimeInMs() - startTime < 5000) {
+//            chunksGenerated++;
+//
+//            loadingScreen.updateStatus(String.format("Fast forwarding world... %.2f%%! :-)", (timer.getTimeInMs() - startTime) / 50.0f));
+//
+//            renderUserInterface();
+//            updateUserInterface();
+//            Display.update();
+//        }
+//
+//        GUIManager.getInstance().removeWindow(loadingScreen);
     }
 
     public void render() {

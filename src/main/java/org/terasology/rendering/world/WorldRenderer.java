@@ -80,7 +80,6 @@ import org.terasology.logic.manager.PortalManager;
 import org.terasology.logic.manager.PostProcessingRenderer;
 import org.terasology.logic.manager.ShaderManager;
 import org.terasology.logic.world.BlockEntityRegistry;
-import org.terasology.logic.world.Chunk;
 import org.terasology.logic.world.ChunkProvider;
 import org.terasology.logic.world.ChunkStore;
 import org.terasology.logic.world.EntityAwareWorldProvider;
@@ -91,7 +90,6 @@ import org.terasology.logic.world.WorldProviderCoreImpl;
 import org.terasology.logic.world.WorldTimeEvent;
 import org.terasology.logic.world.WorldUtil;
 import org.terasology.logic.world.WorldView;
-import org.terasology.logic.world.chunkStore.ChunkStoreGZip;
 import org.terasology.math.Rect2i;
 import org.terasology.math.Region3i;
 import org.terasology.math.TeraMath;
@@ -108,6 +106,7 @@ import org.terasology.rendering.physics.BulletPhysicsRenderer;
 import org.terasology.rendering.primitives.ChunkMesh;
 import org.terasology.rendering.primitives.ChunkTessellator;
 import org.terasology.rendering.shader.ShaderProgram;
+import org.terasology.teraspout.TeraChunk;
 
 import com.google.common.collect.Lists;
 
@@ -125,6 +124,8 @@ public final class WorldRenderer implements IGameObject {
     public static final int MAX_BILLBOARD_CHUNKS = 64;
     public static final int VERTICAL_SEGMENTS = Config.getInstance().getVerticalChunkMeshSegments();
 
+    private final TerasologyEngine engine;
+    
     /* WORLD PROVIDER */
     private final SpoutWorld world;
     private ChunkStore chunkStore;
@@ -152,9 +153,9 @@ public final class WorldRenderer implements IGameObject {
 
     /* RENDERING */
     private final LinkedList<IGameObject> _renderQueueTransparent = Lists.newLinkedList();
-    private final LinkedList<Chunk> _renderQueueChunksOpaque = Lists.newLinkedList();
-    private final PriorityQueue<Chunk> _renderQueueChunksSortedWater = new PriorityQueue<Chunk>(16 * 16, new ChunkProximityComparator());
-    private final PriorityQueue<Chunk> _renderQueueChunksSortedBillboards = new PriorityQueue<Chunk>(16 * 16, new ChunkProximityComparator());
+    private final LinkedList<SpoutChunk> _renderQueueChunksOpaque = Lists.newLinkedList();
+    private final PriorityQueue<SpoutChunk> _renderQueueChunksSortedWater = new PriorityQueue<SpoutChunk>(16 * 16, new ChunkProximityComparator());
+    private final PriorityQueue<SpoutChunk> _renderQueueChunksSortedBillboards = new PriorityQueue<SpoutChunk>(16 * 16, new ChunkProximityComparator());
 
     /* CORE GAME OBJECTS */
     private final PortalManager _portalManager;
@@ -192,15 +193,9 @@ public final class WorldRenderer implements IGameObject {
      * @param title The title/description of the world
      * @param seed  The seed string used to generate the terrain
      */
-    public WorldRenderer(SpoutWorld world, EntityManager manager, LocalPlayerSystem localPlayerSystem) {
+    public WorldRenderer(TerasologyEngine engine, SpoutWorld world, EntityManager manager, LocalPlayerSystem localPlayerSystem) {
+    	this.engine = engine;
     	this.world = world;
-    	
-        if (chunkStore == null) {
-            chunkStore = new ChunkStoreGZip();
-        }
-        EntityAwareWorldProvider entityWorldProvider = new EntityAwareWorldProvider(new WorldProviderCoreImpl(title, seed, time, _chunkProvider));
-        CoreRegistry.put(BlockEntityRegistry.class, entityWorldProvider);
-        CoreRegistry.get(ComponentSystemManager.class).register(entityWorldProvider, "engine:BlockEntityRegistry");
         
         _chunkTesselator = new ChunkTessellator(world);
         _skysphere = new Skysphere(this);
@@ -213,9 +208,6 @@ public final class WorldRenderer implements IGameObject {
         // TODO: won't need localPlayerSystem here once camera is in the ES proper
         localPlayerSystem.setPlayerCamera(_defaultCamera);
         _systemManager = CoreRegistry.get(ComponentSystemManager.class);
-
-
-        initTimeEvents();
     }
 
     /**
@@ -312,7 +304,7 @@ public final class WorldRenderer implements IGameObject {
         }
 
         private float distanceToCamera(SpoutChunk chunk) {
-            Vector3f result = new Vector3f((chunk.getX() + 0.5f) * Chunk.SIZE_X, 0, (chunk.getZ() + 0.5f) * Chunk.SIZE_Z);
+            Vector3f result = new Vector3f((chunk.getX() + 0.5f) * TeraChunk.SIZE_X, 0, (chunk.getZ() + 0.5f) * TeraChunk.SIZE_Z);
 
             Vector3d cameraPos = CoreRegistry.get(WorldRenderer.class).getActiveCamera().getPosition();
             result.x -= cameraPos.x;
@@ -338,23 +330,24 @@ public final class WorldRenderer implements IGameObject {
         _statIgnoredPhases = 0;
 
         for (int i = 0; i < _chunksInProximity.size(); i++) {
-            SpoutChunk c = _chunksInProximity.get(i);
+            SpoutChunk chunk = _chunksInProximity.get(i);
+            TeraChunk c = engine.getTeraSpout().getChunk(chunk);
             ChunkMesh[] mesh = c.getMesh();
 
             if (isChunkVisible(c) && isChunkValidForRender(c)) {
 
                 if (triangleCount(mesh, ChunkMesh.RENDER_PHASE.OPAQUE) > 0)
-                    _renderQueueChunksOpaque.add(c);
+                    _renderQueueChunksOpaque.add(chunk);
                 else
                     _statIgnoredPhases++;
 
                 if (triangleCount(mesh, ChunkMesh.RENDER_PHASE.WATER_AND_ICE) > 0)
-                    _renderQueueChunksSortedWater.add(c);
+                    _renderQueueChunksSortedWater.add(chunk);
                 else
                     _statIgnoredPhases++;
 
                 if (triangleCount(mesh, ChunkMesh.RENDER_PHASE.BILLBOARD_AND_TRANSLUCENT) > 0 && i < MAX_BILLBOARD_CHUNKS)
-                    _renderQueueChunksSortedBillboards.add(c);
+                    _renderQueueChunksSortedBillboards.add(chunk);
                 else
                     _statIgnoredPhases++;
 
@@ -466,9 +459,6 @@ public final class WorldRenderer implements IGameObject {
         /* WORLD RENDERING */
         PerformanceMonitor.startActivity("Render World");
         camera.lookThrough();
-        if (Config.getInstance().isDebugCollision()) {
-            renderDebugCollision(camera);
-        }
 
         glEnable(GL_LIGHT0);
 
@@ -532,7 +522,7 @@ public final class WorldRenderer implements IGameObject {
         * THIRD (AND FOURTH) RENDER PASS: WATER AND ICE
         */
         while (_renderQueueChunksSortedWater.size() > 0) {
-            Chunk c = _renderQueueChunksSortedWater.poll();
+            SpoutChunk c = _renderQueueChunksSortedWater.poll();
 
             for (int j = 0; j < 2; j++) {
 
@@ -572,13 +562,13 @@ public final class WorldRenderer implements IGameObject {
 
         glEnable(GL_LIGHT0);
 
-        for (Chunk c : _renderQueueChunksOpaque)
+        for (SpoutChunk c : _renderQueueChunksOpaque)
             renderChunk(c, ChunkMesh.RENDER_PHASE.OPAQUE, camera);
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        for (Chunk c : _renderQueueChunksSortedBillboards)
+        for (SpoutChunk c : _renderQueueChunksSortedBillboards)
             renderChunk(c, ChunkMesh.RENDER_PHASE.BILLBOARD_AND_TRANSLUCENT, camera);
 
         for (IGameObject g : _renderQueueTransparent)
@@ -588,18 +578,19 @@ public final class WorldRenderer implements IGameObject {
         glDisable(GL_LIGHT0);
     }
 
-    private void renderChunk(Chunk chunk, ChunkMesh.RENDER_PHASE phase, Camera camera) {
-        if (chunk.getChunkState() == Chunk.State.COMPLETE && chunk.getMesh() != null) {
+    private void renderChunk(SpoutChunk sc, ChunkMesh.RENDER_PHASE phase, Camera camera) {
+    	TeraChunk chunk = engine.getTeraSpout().getChunk(sc);
+        if (chunk.getChunkState() == TeraChunk.State.COMPLETE && chunk.getMesh() != null) {
             ShaderProgram shader = ShaderManager.getInstance().getShaderProgram("chunk");
             // Transfer the world offset of the chunk to the shader for various effects
-            shader.setFloat3("chunkOffset", (float) (chunk.getPos().x * Chunk.SIZE_X), (float) (chunk.getPos().y * Chunk.SIZE_Y), (float) (chunk.getPos().z * Chunk.SIZE_Z));
+            shader.setFloat3("chunkOffset", (float) (chunk.getPos().x * TeraChunk.SIZE_X), (float) (chunk.getPos().y * TeraChunk.SIZE_Y), (float) (chunk.getPos().z * TeraChunk.SIZE_Z));
             shader.setFloat("animated", chunk.getAnimated() ? 1.0f: 0.0f);
             shader.setFloat("clipHeight", camera.getClipHeight());
 
             GL11.glPushMatrix();
 
             Vector3d cameraPosition = camera.getPosition();
-            GL11.glTranslated(chunk.getPos().x * Chunk.SIZE_X - cameraPosition.x, chunk.getPos().y * Chunk.SIZE_Y - cameraPosition.y, chunk.getPos().z * Chunk.SIZE_Z - cameraPosition.z);
+            GL11.glTranslated(chunk.getPos().x * TeraChunk.SIZE_X - cameraPosition.x, chunk.getPos().y * TeraChunk.SIZE_Y - cameraPosition.y, chunk.getPos().z * TeraChunk.SIZE_Z - cameraPosition.z);
 
             for (int i = 0; i < VERTICAL_SEGMENTS; i++) {
                 if (!chunk.getMesh()[i].isEmpty()) {
@@ -671,27 +662,6 @@ public final class WorldRenderer implements IGameObject {
         PerformanceMonitor.endActivity();
     }
 
-    private void renderDebugCollision(Camera camera) {
-        if (_player != null && _player.isValid()) {
-            AABBCollisionComponent collision = _player.getEntity().getComponent(AABBCollisionComponent.class);
-            if (collision != null) {
-                Vector3f worldLoc = _player.getPosition();
-                AABB aabb = new AABB(new Vector3d(worldLoc), new Vector3d(collision.getExtents()));
-                aabb.render(1f);
-            }
-        }
-
-        List<BlockPosition> blocks = WorldUtil.gatherAdjacentBlockPositions(new Vector3f(camera.getPosition()));
-
-        for (int i = 0; i < blocks.size(); i++) {
-            BlockPosition p = blocks.get(i);
-            Block block = getWorldProvider().getBlock(new Vector3f(p.x, p.y, p.z));
-            for (AABB blockAABB : block.getColliders(p.x, p.y, p.z)) {
-                blockAABB.render(1f);
-            }
-        }
-    }
-
     private boolean isUnderwater() {
         Vector3d cameraPos = CoreRegistry.get(WorldRenderer.class).getActiveCamera().getPosition();
         Block block = CoreRegistry.get(WorldProvider.class).getBlock(new Vector3f(cameraPos));
@@ -752,7 +722,7 @@ public final class WorldRenderer implements IGameObject {
      * @return The player offset on the x-axis
      */
     private int calcCamChunkOffsetX() {
-        return (int) (getActiveCamera().getPosition().x / Chunk.SIZE_X);
+        return (int) (getActiveCamera().getPosition().x / TeraChunk.SIZE_X);
     }
 
     /**
@@ -761,7 +731,7 @@ public final class WorldRenderer implements IGameObject {
      * @return The player offset on the z-axis
      */
     private int calcCamChunkOffsetZ() {
-        return (int) (getActiveCamera().getPosition().z / Chunk.SIZE_Z);
+        return (int) (getActiveCamera().getPosition().z / TeraChunk.SIZE_Z);
     }
 
     /**
@@ -770,17 +740,19 @@ public final class WorldRenderer implements IGameObject {
      * @param p The player
      */
     public void setPlayer(LocalPlayer p) {
-        _player = p;
-        _chunkProvider.addRegionEntity(p.getEntity(), Config.getInstance().getActiveViewingDistance());
-        updateChunksInProximity(true);
+//        _player = p;
+//        _chunkProvider.addRegionEntity(p.getEntity(), Config.getInstance().getActiveViewingDistance());
+//        updateChunksInProximity(true);
+    	// TODO
     }
 
     public void changeViewDistance(int viewingDistance) {
-        _logger.log(Level.INFO, "New Viewing Distance: " + viewingDistance);
-        if (_player != null) {
-            _chunkProvider.addRegionEntity(_player.getEntity(), viewingDistance);
-        }
-        updateChunksInProximity(true);
+//        _logger.log(Level.INFO, "New Viewing Distance: " + viewingDistance);
+//        if (_player != null) {
+//            _chunkProvider.addRegionEntity(_player.getEntity(), viewingDistance);
+//        }
+//        updateChunksInProximity(true);
+    	// TODO
     }
 
     /**
@@ -842,11 +814,11 @@ public final class WorldRenderer implements IGameObject {
         return getActiveCamera().getViewFrustum().intersects(aabb);
     }
 
-    public boolean isChunkValidForRender(Chunk c) {
+    public boolean isChunkValidForRender(TeraChunk c) {
         return true; // TODO wait for loading
     }
 
-    public boolean isChunkVisible(Chunk c) {
+    public boolean isChunkVisible(TeraChunk c) {
         return getActiveCamera().getViewFrustum().intersects(c.getAABB());
     }
 

@@ -21,11 +21,11 @@ import org.spout.api.geo.World;
 import org.terasology.game.CoreRegistry;
 import org.terasology.game.TerasologyEngine;
 import org.terasology.logic.manager.Config;
-import org.terasology.logic.world.Chunk;
 import org.terasology.logic.world.WorldProvider;
 import org.terasology.logic.world.WorldView;
 import org.terasology.rendering.primitives.ChunkMesh;
 import org.terasology.rendering.primitives.ChunkTessellator;
+import org.terasology.teraspout.TeraChunk;
 
 import com.google.common.collect.Sets;
 
@@ -44,7 +44,7 @@ public final class ChunkUpdateManager {
     private static final int MAX_THREADS = Config.getInstance().getMaxThreads();
 
     /* CHUNK UPDATES */
-    private static final Set<Chunk> currentlyProcessedChunks = Sets.newHashSet();
+    private static final Set<TeraChunk> currentlyProcessedChunks = Sets.newHashSet();
 
     private final ChunkTessellator tessellator;
     private final World worldProvider;
@@ -63,7 +63,7 @@ public final class ChunkUpdateManager {
      * @return True if a chunk update was executed
      */
     // TODO: Review this system
-    public boolean queueChunkUpdate(Chunk chunk, final UPDATE_TYPE type) {
+    public boolean queueChunkUpdate(TeraChunk chunk, final UPDATE_TYPE type) {
 
         if (!currentlyProcessedChunks.contains(chunk) && (currentlyProcessedChunks.size() < MAX_THREADS || type != UPDATE_TYPE.DEFAULT)) {
             executeChunkUpdate(chunk);
@@ -73,7 +73,7 @@ public final class ChunkUpdateManager {
         return false;
     }
 
-    private void executeChunkUpdate(final Chunk c) {
+    private void executeChunkUpdate(final TeraChunk c) {
         currentlyProcessedChunks.add(c);
 
         // Create a new thread and start processing
@@ -81,11 +81,12 @@ public final class ChunkUpdateManager {
             @Override
             public void run() {
                 ChunkMesh[] newMeshes = new ChunkMesh[WorldRenderer.VERTICAL_SEGMENTS];
-                WorldView worldView = worldProvider.getWorldViewAround(c.getPos());
+//                WorldView worldView = worldProvider.getWorldViewAround(c.getPos());
+                WorldView worldView = null; // TODO use chunkmodel somehow
                 if (worldView != null) {
                     c.setDirty(false);
                     for (int seg = 0; seg < WorldRenderer.VERTICAL_SEGMENTS; seg++) {
-                        newMeshes[seg] = tessellator.generateMesh(worldView, c.getPos(), Chunk.SIZE_Y / WorldRenderer.VERTICAL_SEGMENTS, seg * (Chunk.SIZE_Y / WorldRenderer.VERTICAL_SEGMENTS));
+                        newMeshes[seg] = tessellator.generateMesh(worldView, c.getPos(), TeraChunk.SIZE_Y / WorldRenderer.VERTICAL_SEGMENTS, seg * (TeraChunk.SIZE_Y / WorldRenderer.VERTICAL_SEGMENTS));
                     }
 
                     c.setPendingMesh(newMeshes);

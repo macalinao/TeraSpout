@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.logic.world;
+package org.terasology.teraspout;
 
 import com.bulletphysics.dynamics.RigidBody;
 import com.google.common.base.Objects;
@@ -44,7 +44,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author Benjamin Glatzel <benjamin.glatzel@me.com>
  */
-public class Chunk implements Externalizable {
+public class TeraChunk implements Externalizable {
     public static final long serialVersionUID = 79881925217704826L;
 
     public enum State {
@@ -92,7 +92,7 @@ public class Chunk implements Externalizable {
     private boolean disposed = false;
 
 
-    public Chunk() {
+    public TeraChunk() {
         blocks = new TeraArray(getChunkSizeX(), getChunkSizeY(), getChunkSizeZ());
         sunlight = new TeraSmartArray(getChunkSizeX(), getChunkSizeY(), getChunkSizeZ());
         light = new TeraSmartArray(getChunkSizeX(), getChunkSizeY(), getChunkSizeZ());
@@ -101,18 +101,18 @@ public class Chunk implements Externalizable {
         setDirty(true);
     }
 
-    public Chunk(int x, int y, int z) {
+    public TeraChunk(int x, int y, int z) {
         this();
         pos.x = x;
         pos.y = y;
         pos.z = z;
     }
 
-    public Chunk(Vector3i pos) {
+    public TeraChunk(Vector3i pos) {
         this(pos.x, pos.y, pos.z);
     }
 
-    public Chunk(Chunk other) {
+    public TeraChunk(TeraChunk other) {
         pos.set(other.pos);
         blocks = new TeraArray(other.blocks);
         sunlight = new TeraSmartArray(other.sunlight);

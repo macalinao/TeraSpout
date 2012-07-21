@@ -78,7 +78,7 @@ public class ShaderParametersPost implements IShaderParameters {
         }
 
         WorldRenderer renderer = CoreRegistry.get(WorldRenderer.class);
-        float fogIntensity = renderer.getWorldProvider().getBiomeProvider().getFog(renderer.getWorldProvider().getTimeInDays()) * daylight;
+        float fogIntensity = 0.1f * daylight; // TODO fog
 
         program.setFloat("fogIntensity", fogIntensity);
         program.setFloat("fogLinearIntensity", fogLinearIntensity);
