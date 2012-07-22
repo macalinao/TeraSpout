@@ -618,16 +618,7 @@ public final class WorldRenderer implements IGameObject {
         if (_activeCamera != null) {
             _activeCamera.update(delta);
         }
-
-        // Simulate world
-        // TODO: Simulators
-        PerformanceMonitor.startActivity("Liquid");
-        //_worldProvider.getLiquidSimulator().simulate(false);
-        PerformanceMonitor.endActivity();
-        PerformanceMonitor.startActivity("Growth");
-        // _worldProvider.getGrowthSimulator().simulate(false);
-        PerformanceMonitor.endActivity();
-
+        
         PerformanceMonitor.startActivity("Physics Renderer");
         _bulletRenderer.update(delta);
         PerformanceMonitor.endActivity();
