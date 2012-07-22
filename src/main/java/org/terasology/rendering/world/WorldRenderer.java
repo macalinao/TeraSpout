@@ -607,10 +607,6 @@ public final class WorldRenderer implements IGameObject {
         _spawnCamera.update(delta);
         PerformanceMonitor.endActivity();
 
-        PerformanceMonitor.startActivity("Update Tick");
-        updateTick(delta);
-        PerformanceMonitor.endActivity();
-
         PerformanceMonitor.startActivity("Update Close Chunks");
         updateChunksInProximity(false);
         PerformanceMonitor.endActivity();
@@ -669,23 +665,6 @@ public final class WorldRenderer implements IGameObject {
 
         _spawnCamera.getPosition().set(cameraPosition);
         _spawnCamera.getViewingDirection().set(cameraDirection);
-    }
-
-    /**
-     * Performs and maintains tick-based logic. If the game is paused this logic is not executed
-     * First effect: update the _tick variable that animation is based on
-     * Secondary effect: Trigger spawning (via PortalManager) once every second
-     * Tertiary effect: Trigger socializing (via MobManager) once every 10 seconds
-     */
-    private void updateTick(float delta) {
-        // Update the animation tick
-        _tick += delta * 1000;
-
-        // This block is based on seconds or less frequent timings
-        if (System.currentTimeMillis() - _lastTick >= 1000) {
-            _tickTock++;
-            _lastTick = System.currentTimeMillis();
-        }
     }
 
     /**
