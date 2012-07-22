@@ -35,11 +35,8 @@ import static org.lwjgl.opengl.GL11.glPopMatrix;
 import static org.lwjgl.opengl.GL11.glPushMatrix;
 
 import java.awt.image.BufferedImage;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -58,20 +55,17 @@ import javax.vecmath.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
-import org.spout.api.Spout;
 import org.spout.api.generator.biome.Biome;
 import org.spout.api.geo.World;
 import org.spout.engine.world.SpoutChunk;
 import org.spout.engine.world.SpoutWorld;
 import org.terasology.componentSystem.RenderSystem;
 import org.terasology.componentSystem.controllers.LocalPlayerSystem;
-import org.terasology.components.AABBCollisionComponent;
 import org.terasology.components.PlayerComponent;
 import org.terasology.entitySystem.EntityManager;
 import org.terasology.game.ComponentSystemManager;
 import org.terasology.game.CoreRegistry;
 import org.terasology.game.TerasologyEngine;
-import org.terasology.game.Timer;
 import org.terasology.logic.LocalPlayer;
 import org.terasology.logic.manager.AudioManager;
 import org.terasology.logic.manager.Config;
@@ -79,25 +73,12 @@ import org.terasology.logic.manager.PathManager;
 import org.terasology.logic.manager.PortalManager;
 import org.terasology.logic.manager.PostProcessingRenderer;
 import org.terasology.logic.manager.ShaderManager;
-import org.terasology.logic.world.BlockEntityRegistry;
-import org.terasology.logic.world.ChunkProvider;
 import org.terasology.logic.world.ChunkStore;
-import org.terasology.logic.world.EntityAwareWorldProvider;
-import org.terasology.logic.world.WorldBiomeProvider;
-import org.terasology.logic.world.WorldInfo;
 import org.terasology.logic.world.WorldProvider;
-import org.terasology.logic.world.WorldProviderCoreImpl;
-import org.terasology.logic.world.WorldTimeEvent;
-import org.terasology.logic.world.WorldUtil;
-import org.terasology.logic.world.WorldView;
 import org.terasology.math.Rect2i;
-import org.terasology.math.Region3i;
 import org.terasology.math.TeraMath;
-import org.terasology.math.Vector3i;
 import org.terasology.model.blocks.Block;
-import org.terasology.model.blocks.management.BlockManager;
 import org.terasology.model.structures.AABB;
-import org.terasology.model.structures.BlockPosition;
 import org.terasology.performanceMonitor.PerformanceMonitor;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.cameras.DefaultCamera;
@@ -164,7 +145,6 @@ public final class WorldRenderer implements IGameObject {
     private final Skysphere _skysphere;
 
     /* TICKING */
-    private Timer _timer = CoreRegistry.get(Timer.class);
     private float _tick = 0;
     private int _tickTock = 0;
     private long _lastTick;
@@ -707,9 +687,9 @@ public final class WorldRenderer implements IGameObject {
         _tick += delta * 1000;
 
         // This block is based on seconds or less frequent timings
-        if (_timer.getTimeInMs() - _lastTick >= 1000) {
+        if (System.currentTimeMillis() - _lastTick >= 1000) {
             _tickTock++;
-            _lastTick = _timer.getTimeInMs();
+            _lastTick = System.currentTimeMillis();
 
             // PortalManager ticks for spawning once a second
             _portalManager.tickSpawn();

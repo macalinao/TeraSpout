@@ -1,12 +1,11 @@
 package org.terasology.input;
 
-import com.google.common.collect.Lists;
+import java.util.List;
+
 import org.terasology.entitySystem.EntityRef;
-import org.terasology.game.CoreRegistry;
-import org.terasology.game.Timer;
 import org.terasology.logic.manager.GUIManager;
 
-import java.util.List;
+import com.google.common.collect.Lists;
 
 /**
  * A BindableButton is pseudo button that is controlled by one or more actual inputs (whether keys, mouse buttons or the
@@ -28,8 +27,6 @@ public class BindableButtonImpl implements BindableButton {
     private int repeatTime = 0;
     private long lastActivateTime;
 
-    private Timer timer;
-
     /**
      * Creates the button. Package-private, as should be created through the InputSystem
      *
@@ -40,7 +37,6 @@ public class BindableButtonImpl implements BindableButton {
         this.id = id;
         this.displayName = displayName;
         this.buttonEvent = event;
-        timer = CoreRegistry.get(Timer.class);
     }
 
     @Override
@@ -128,7 +124,7 @@ public class BindableButtonImpl implements BindableButton {
         if (pressed) {
             activeInputs++;
             if (activeInputs == 1 && mode.isActivatedOnPress()) {
-                lastActivateTime = timer.getTimeInMs();
+                lastActivateTime = System.currentTimeMillis();
                 if (guiOnly) {
                     GUIManager.getInstance().processBindButton(id, pressed);
                     keyConsumed = true;
@@ -163,7 +159,7 @@ public class BindableButtonImpl implements BindableButton {
     }
 
     void update(EntityRef localPlayer, float delta, EntityRef target) {
-        long time = timer.getTimeInMs();
+        long time = System.currentTimeMillis();
         if (repeating && getState() == ButtonState.DOWN && mode.isActivatedOnPress() && time - lastActivateTime > repeatTime) {
             lastActivateTime = time;
             if (!GUIManager.getInstance().isConsumingInput()) {

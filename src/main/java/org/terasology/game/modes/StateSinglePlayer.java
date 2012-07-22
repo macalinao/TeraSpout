@@ -50,7 +50,6 @@ import org.terasology.entitySystem.persistence.WorldPersister;
 import org.terasology.game.ComponentSystemManager;
 import org.terasology.game.CoreRegistry;
 import org.terasology.game.TerasologyEngine;
-import org.terasology.game.Timer;
 import org.terasology.game.bootstrap.EntitySystemBuilder;
 import org.terasology.input.CameraTargetSystem;
 import org.terasology.input.InputSystem;

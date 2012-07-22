@@ -15,6 +15,41 @@
  */
 package org.terasology.rendering.physics;
 
+import java.nio.FloatBuffer;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.vecmath.Matrix3f;
+import javax.vecmath.Matrix4f;
+import javax.vecmath.Vector3d;
+import javax.vecmath.Vector3f;
+
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
+import org.terasology.asset.AssetType;
+import org.terasology.asset.AssetUri;
+import org.terasology.components.CharacterMovementComponent;
+import org.terasology.components.InventoryComponent;
+import org.terasology.components.ItemComponent;
+import org.terasology.components.world.LocationComponent;
+import org.terasology.entityFactory.BlockItemFactory;
+import org.terasology.entitySystem.EntityManager;
+import org.terasology.entitySystem.EntityRef;
+import org.terasology.entitySystem.PrefabManager;
+import org.terasology.events.inventory.ReceiveItemEvent;
+import org.terasology.game.CoreRegistry;
+import org.terasology.logic.manager.AudioManager;
+import org.terasology.model.blocks.Block;
+import org.terasology.model.blocks.management.BlockManager;
+import org.terasology.rendering.interfaces.IGameObject;
+import org.terasology.rendering.primitives.ChunkMesh;
+import org.terasology.rendering.world.WorldRenderer;
+import org.terasology.teraspout.TeraChunk;
+import org.terasology.utilities.FastRandom;
+
 import com.beust.jcommander.internal.Lists;
 import com.bulletphysics.collision.broadphase.BroadphaseInterface;
 import com.bulletphysics.collision.broadphase.DbvtBroadphase;
@@ -31,42 +66,6 @@ import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
 import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSolver;
 import com.bulletphysics.linearmath.DefaultMotionState;
 import com.bulletphysics.linearmath.Transform;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-import org.terasology.asset.AssetType;
-import org.terasology.asset.AssetUri;
-import org.terasology.components.CharacterMovementComponent;
-import org.terasology.components.InventoryComponent;
-import org.terasology.components.ItemComponent;
-import org.terasology.components.world.LocationComponent;
-import org.terasology.entityFactory.BlockItemFactory;
-import org.terasology.entitySystem.EntityManager;
-import org.terasology.entitySystem.EntityRef;
-import org.terasology.entitySystem.PrefabManager;
-import org.terasology.events.inventory.ReceiveItemEvent;
-import org.terasology.game.CoreRegistry;
-import org.terasology.game.Timer;
-import org.terasology.logic.LocalPlayer;
-import org.terasology.logic.manager.AudioManager;
-import org.terasology.model.blocks.Block;
-import org.terasology.model.blocks.management.BlockManager;
-import org.terasology.rendering.interfaces.IGameObject;
-import org.terasology.rendering.primitives.ChunkMesh;
-import org.terasology.rendering.world.WorldRenderer;
-import org.terasology.teraspout.TeraChunk;
-import org.terasology.utilities.FastRandom;
-
-import javax.vecmath.Matrix3f;
-import javax.vecmath.Matrix4f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Renders blocks using the Bullet physics library.
@@ -85,7 +84,7 @@ public class BulletPhysicsRenderer implements IGameObject {
         public BlockRigidBody(RigidBodyConstructionInfo constructionInfo, byte type) {
             super(constructionInfo);
             _type = type;
-            _createdAt = _timer.getTimeInMs();
+            _createdAt = System.currentTimeMillis();
         }
 
         public float distanceToEntity(Vector3f pos) {
@@ -100,7 +99,7 @@ public class BulletPhysicsRenderer implements IGameObject {
         }
 
         public long calcAgeInMs() {
-            return _timer.getTimeInMs() - _createdAt;
+            return System.currentTimeMillis() - _createdAt;
         }
 
         public byte getType() {
@@ -145,7 +144,6 @@ public class BulletPhysicsRenderer implements IGameObject {
 
     private final BlockItemFactory _blockItemFactory;
 
-    private Timer _timer;
     private FastRandom _random = new FastRandom();
     private final WorldRenderer _parent;
 
@@ -158,7 +156,6 @@ public class BulletPhysicsRenderer implements IGameObject {
         _discreteDynamicsWorld.setGravity(new Vector3f(0f, -10f, 0f));
         _parent = parent;
         _blockItemFactory = new BlockItemFactory(CoreRegistry.get(EntityManager.class), CoreRegistry.get(PrefabManager.class));
-        _timer = CoreRegistry.get(Timer.class);
     }
 
     public BlockRigidBody[] addLootableBlocks(Vector3f position, Block block) {

@@ -37,7 +37,6 @@ import org.terasology.events.input.binds.ToolbarSlotButton;
 import org.terasology.events.input.binds.UseItemButton;
 import org.terasology.events.input.binds.VerticalMovementAxis;
 import org.terasology.game.CoreRegistry;
-import org.terasology.game.Timer;
 import org.terasology.input.ButtonState;
 import org.terasology.logic.LocalPlayer;
 import org.terasology.logic.manager.Config;
@@ -59,7 +58,6 @@ import com.bulletphysics.linearmath.QuaternionUtil;
 // TODO: Camera should become an entity/component, so it can follow the player naturally
 public class LocalPlayerSystem implements RenderSystem, EventHandlerSystem {
     private LocalPlayer localPlayer;
-    private Timer timer;
 
     private WorldProvider worldProvider;
     private DefaultCamera playerCamera;
@@ -77,7 +75,6 @@ public class LocalPlayerSystem implements RenderSystem, EventHandlerSystem {
     public void initialise() {
         worldProvider = CoreRegistry.get(WorldProvider.class);
         localPlayer = CoreRegistry.get(LocalPlayer.class);
-        timer = CoreRegistry.get(Timer.class);
     }
 
     @Override
@@ -114,10 +111,10 @@ public class LocalPlayerSystem implements RenderSystem, EventHandlerSystem {
         if (event.getState() == ButtonState.DOWN) {
             CharacterMovementComponent characterMovement = entity.getComponent(CharacterMovementComponent.class);
             characterMovement.jump = true;
-            if (timer.getTimeInMs() - lastTimeSpacePressed < 200) {
+            if (System.currentTimeMillis() - lastTimeSpacePressed < 200) {
                 characterMovement.isGhosting = !characterMovement.isGhosting;
             }
-            lastTimeSpacePressed = timer.getTimeInMs();
+            lastTimeSpacePressed = System.currentTimeMillis();
             event.consume();
         }
     }
@@ -239,7 +236,7 @@ public class LocalPlayerSystem implements RenderSystem, EventHandlerSystem {
 
     @ReceiveEvent(components = {LocalPlayerComponent.class, InventoryComponent.class})
     public void onAttackRequest(AttackButton event, EntityRef entity) {
-        if (!event.isDown() || timer.getTimeInMs() - lastInteraction < 200) {
+        if (!event.isDown() || System.currentTimeMillis() - lastInteraction < 200) {
             return;
         }
 
@@ -250,7 +247,7 @@ public class LocalPlayerSystem implements RenderSystem, EventHandlerSystem {
         EntityRef selectedItemEntity = inventory.itemSlots.get(localPlayerComp.selectedTool);
         attack(event.getTarget(), entity, selectedItemEntity);
 
-        lastInteraction = timer.getTimeInMs();
+        lastInteraction = System.currentTimeMillis();
         localPlayerComp.handAnimation = 0.5f;
         entity.saveComponent(localPlayerComp);
         event.consume();
@@ -315,7 +312,7 @@ public class LocalPlayerSystem implements RenderSystem, EventHandlerSystem {
 
     @ReceiveEvent(components = {LocalPlayerComponent.class, InventoryComponent.class})
     public void onUseItemRequest(UseItemButton event, EntityRef entity) {
-        if (!event.isDown() || timer.getTimeInMs() - lastInteraction < 200) {
+        if (!event.isDown() || System.currentTimeMillis() - lastInteraction < 200) {
             return;
         }
 
@@ -332,7 +329,7 @@ public class LocalPlayerSystem implements RenderSystem, EventHandlerSystem {
             attack(event.getTarget(), entity, selectedItemEntity);
         }
 
-        lastInteraction = timer.getTimeInMs();
+        lastInteraction = System.currentTimeMillis();
         localPlayerComp.handAnimation = 0.5f;
         entity.saveComponent(localPlayerComp);
         event.consume();

@@ -81,7 +81,6 @@ public class TerasologyEngine extends SpoutClient {
     private List<StateChangeFunction> pendingStateChanges = Lists.newArrayList();
 
     private GameState state;
-    private Timer timer;
     private final ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
     private final TeraSpout teraspout;
     private Logger logger = super.getLogger();
@@ -112,7 +111,6 @@ public class TerasologyEngine extends SpoutClient {
         initOpenAL();
         initControls();
         initManagers();
-        initTimer(); // Dependant on LWJGL
         initialised = true;
     }
 
@@ -321,11 +319,6 @@ public class TerasologyEngine extends SpoutClient {
 
     }
 
-    private void initTimer() {
-        timer = new Timer();
-        CoreRegistry.put(Timer.class, timer);
-    }
-
     private void cleanup() {
         logger.log(Level.INFO, "Shutting down Terasology...");
         Config.getInstance().saveConfig(new File(PathManager.getInstance().getWorldPath(), "last.cfg"));
@@ -365,10 +358,8 @@ public class TerasologyEngine extends SpoutClient {
             return;
         }
 
-        timer.tick();
-
         PerformanceMonitor.startActivity("Render");
-        state.onRender(timer.getDelta());
+        state.onRender(dt);
         Display.update();
         Display.sync(60);
         PerformanceMonitor.endActivity();
