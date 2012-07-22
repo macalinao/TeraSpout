@@ -70,7 +70,6 @@ import org.terasology.logic.LocalPlayer;
 import org.terasology.logic.manager.AudioManager;
 import org.terasology.logic.manager.Config;
 import org.terasology.logic.manager.PathManager;
-import org.terasology.logic.manager.PortalManager;
 import org.terasology.logic.manager.PostProcessingRenderer;
 import org.terasology.logic.manager.ShaderManager;
 import org.terasology.logic.world.ChunkStore;
@@ -138,9 +137,6 @@ public final class WorldRenderer implements IGameObject {
     private final PriorityQueue<SpoutChunk> _renderQueueChunksSortedWater = new PriorityQueue<SpoutChunk>(16 * 16, new ChunkProximityComparator());
     private final PriorityQueue<SpoutChunk> _renderQueueChunksSortedBillboards = new PriorityQueue<SpoutChunk>(16 * 16, new ChunkProximityComparator());
 
-    /* CORE GAME OBJECTS */
-    private final PortalManager _portalManager;
-
     /* HORIZON */
     private final Skysphere _skysphere;
 
@@ -181,7 +177,6 @@ public final class WorldRenderer implements IGameObject {
         _skysphere = new Skysphere(this);
         
         _chunkUpdateManager = new ChunkUpdateManager(_chunkTesselator, world);
-        _portalManager = new PortalManager(manager);
         _blockGrid = new BlockGrid();
         _bulletRenderer = new BulletPhysicsRenderer(this);
 
@@ -690,9 +685,6 @@ public final class WorldRenderer implements IGameObject {
         if (System.currentTimeMillis() - _lastTick >= 1000) {
             _tickTock++;
             _lastTick = System.currentTimeMillis();
-
-            // PortalManager ticks for spawning once a second
-            _portalManager.tickSpawn();
         }
     }
 
