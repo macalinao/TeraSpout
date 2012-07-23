@@ -15,25 +15,18 @@
  */
 package org.terasology.teraspout;
 
-import groovyjarjarasm.asm.Handle;
-
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.vecmath.Vector3d;
 
 import org.spout.api.geo.cuboid.Chunk;
+import org.spout.api.material.BlockMaterial;
 import org.spout.engine.world.SpoutChunk;
 import org.terasology.logic.manager.Config;
 import org.terasology.math.TeraMath;
 import org.terasology.math.Vector3i;
 import org.terasology.model.blocks.Block;
-import org.terasology.model.blocks.management.BlockManager;
 import org.terasology.model.structures.AABB;
-import org.terasology.model.structures.TeraArray;
 import org.terasology.model.structures.TeraSmartArray;
 import org.terasology.rendering.primitives.ChunkMesh;
 
@@ -71,7 +64,6 @@ public class TeraChunk {
     public static final Vector3i CHUNK_SIZE = new Vector3i(Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE);
     public static final Vector3i INNER_CHUNK_POS_FILTER = new Vector3i(INNER_CHUNK_POS_FILTER_X, 0, INNER_CHUNK_POS_FILTER_Z);
 
-    protected TeraArray blocks;
     protected TeraSmartArray sunlight, light, states;
 
     private State chunkState = State.ADJACENCY_GENERATION_PENDING;
@@ -94,7 +86,6 @@ public class TeraChunk {
     
     public TeraChunk(SpoutChunk handle) {
     	this.handle = handle;
-        blocks = new TeraArray(Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE);
         sunlight = new TeraSmartArray(Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE);
         light  = new TeraSmartArray(Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE);
         states  = new TeraSmartArray(Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE);
@@ -143,59 +134,21 @@ public class TeraChunk {
         }
     }
 
-    public byte getBlockId(Vector3i pos) {
-        return blocks.get(pos.x, pos.y, pos.z);
-    }
-
-    public byte getBlockId(int x, int y, int z) {
-        return blocks.get(x, y, z);
+    public short getBlockId(int x, int y, int z) {
+        return handle.getBlockMaterial(x, y, z).getId();
     }
 
     public Block getBlock(Vector3i pos) {
-        return BlockManager.getInstance().getBlock(blocks.get(pos.x, pos.y, pos.z));
+        return getBlock(pos.x, pos.y, pos.z);
     }
 
     public Block getBlock(int x, int y, int z) {
-        return BlockManager.getInstance().getBlock(blocks.get(x, y, z));
-    }
-
-    public boolean setBlock(int x, int y, int z, byte blockId) {
-        byte oldValue = blocks.set(x, y, z, blockId);
-        if (oldValue != blockId) {
-            return true;
-        }
-        return false;
-    }
-
-    public boolean setBlock(int x, int y, int z, byte newBlockId, byte oldBlockId) {
-        if (newBlockId != oldBlockId) {
-            return blocks.set(x, y, z, newBlockId, oldBlockId);
-        }
-        return false;
-    }
-
-    public boolean setBlock(int x, int y, int z, Block block) {
-        return setBlock(x, y, z, block.getId());
-    }
-
-    public boolean setBlock(int x, int y, int z, Block newBlock, Block oldBlock) {
-        return setBlock(x, y, z, newBlock.getId(), oldBlock.getId());
-    }
-
-    public boolean setBlock(Vector3i pos, byte blockId) {
-        return setBlock(pos.x, pos.y, pos.z, blockId);
-    }
-
-    public boolean setBlock(Vector3i pos, byte blockId, byte oldBlockId) {
-        return setBlock(pos.x, pos.y, pos.z, blockId, oldBlockId);
-    }
-
-    public boolean setBlock(Vector3i pos, Block block) {
-        return setBlock(pos.x, pos.y, pos.z, block.getId());
-    }
-
-    public boolean setBlock(Vector3i pos, Block block, Block oldBlock) {
-        return setBlock(pos.x, pos.y, pos.z, block.getId(), oldBlock.getId());
+    	org.spout.api.geo.cuboid.Block block = handle.getBlock(x, y, z, null);
+    	if (block == null) {
+    		return null;
+    	}
+    	BlockMaterial mat = block.getMaterial();
+        return TeraSpout.getInstance().getBlock(mat);
     }
 
     public byte getSunlight(Vector3i pos) {

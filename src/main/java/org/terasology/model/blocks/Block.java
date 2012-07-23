@@ -144,6 +144,7 @@ public class Block implements IGameObject {
 
     /**
      * Init. a new block with default properties in place.
+     * @param block 
      */
     public Block() {
         withTitle("Untitled block");

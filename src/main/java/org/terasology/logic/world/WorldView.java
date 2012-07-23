@@ -127,19 +127,6 @@ public class WorldView {
         return chunks[chunkIndex].getLight(TeraMath.calcBlockPos(blockX, blockY, blockZ, chunkFilterSize));
     }
 
-    public boolean setBlock(Vector3i pos, Block type, Block oldType) {
-        return setBlock(pos.x, pos.y, pos.z, type, oldType);
-    }
-
-    public boolean setBlock(int blockX, int blockY, int blockZ, Block type, Block oldType) {
-        if (!blockRegion.encompasses(blockX, blockY, blockZ)) {
-            return false;
-        }
-
-        int chunkIndex = relChunkIndex(blockX, blockY, blockZ);
-        return chunks[chunkIndex].setBlock(TeraMath.calcBlockPos(blockX, blockY, blockZ, chunkFilterSize), type, oldType);
-    }
-
     public void setLight(Vector3i pos, byte light) {
         setLight(pos.x, pos.y, pos.z, light);
     }
