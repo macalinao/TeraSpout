@@ -36,9 +36,6 @@ public class BlockManager {
     /* SINGLETON */
     private static BlockManager _instance;
 
-    /* GROOVY */
-    private BlockManifestor _manifestor;
-
     /* BLOCKS */
     private final HashMap<String, Block> _blocksByTitle = new HashMap<String, Block>(128);
     private final TByteObjectHashMap<Block> _blocksById = new TByteObjectHashMap<Block>(128);

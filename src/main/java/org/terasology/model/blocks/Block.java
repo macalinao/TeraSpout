@@ -54,8 +54,6 @@ import org.terasology.rendering.shader.ShaderProgram;
  * @author Rasmus 'Cervator' Praestholm <cervator@gmail.com>
  */
 public class Block implements IGameObject {
-
-    private static final Logger logger = Logger.getLogger(Block.class.getName());
     public static final int ATLAS_SIZE_IN_PX = 256;
     public static final int TEXTURE_SIZE_IN_PX = 16;
     public static final int ATLAS_ELEMENTS_PER_ROW_AND_COLUMN = ATLAS_SIZE_IN_PX / TEXTURE_SIZE_IN_PX;
