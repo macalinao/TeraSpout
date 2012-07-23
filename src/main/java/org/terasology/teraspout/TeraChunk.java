@@ -15,8 +15,18 @@
  */
 package org.terasology.teraspout;
 
-import com.bulletphysics.dynamics.RigidBody;
-import com.google.common.base.Objects;
+import groovyjarjarasm.asm.Handle;
+
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.concurrent.locks.ReentrantLock;
+
+import javax.vecmath.Vector3d;
+
+import org.spout.api.geo.cuboid.Chunk;
+import org.spout.engine.world.SpoutChunk;
 import org.terasology.logic.manager.Config;
 import org.terasology.math.TeraMath;
 import org.terasology.math.Vector3i;
@@ -27,12 +37,8 @@ import org.terasology.model.structures.TeraArray;
 import org.terasology.model.structures.TeraSmartArray;
 import org.terasology.rendering.primitives.ChunkMesh;
 
-import javax.vecmath.Vector3d;
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.util.concurrent.locks.ReentrantLock;
+import com.bulletphysics.dynamics.RigidBody;
+import com.google.common.base.Objects;
 
 /**
  * Chunks are the basic components of the world. Each chunk contains a fixed amount of blocks
@@ -56,18 +62,15 @@ public class TeraChunk implements Externalizable {
     }
 
     /* PUBLIC CONSTANT VALUES */
-    public static final int SIZE_X = 16;
-    public static final int SIZE_Y = 256;
-    public static final int SIZE_Z = 16;
-    public static final int INNER_CHUNK_POS_FILTER_X = TeraMath.ceilPowerOfTwo(SIZE_X) - 1;
-    public static final int INNER_CHUNK_POS_FILTER_Z = TeraMath.ceilPowerOfTwo(SIZE_Z) - 1;
-    public static final int POWER_X = TeraMath.sizeOfPower(SIZE_X);
-    public static final int POWER_Z = TeraMath.sizeOfPower(SIZE_Z);
+    public static final int INNER_CHUNK_POS_FILTER_X = TeraMath.ceilPowerOfTwo(Chunk.BLOCKS.SIZE) - 1;
+    public static final int INNER_CHUNK_POS_FILTER_Z = TeraMath.ceilPowerOfTwo(Chunk.BLOCKS.SIZE) - 1;
+    public static final int POWER_X = TeraMath.sizeOfPower(Chunk.BLOCKS.SIZE);
+    public static final int POWER_Z = TeraMath.sizeOfPower(Chunk.BLOCKS.SIZE);
     public static final int VERTICAL_SEGMENTS = Config.getInstance().getVerticalChunkMeshSegments();
     public static final byte MAX_LIGHT = 0x0f;
 
     public static final Vector3i CHUNK_POWER = new Vector3i(POWER_X, 0, POWER_Z);
-    public static final Vector3i CHUNK_SIZE = new Vector3i(SIZE_X, SIZE_Y, SIZE_Z);
+    public static final Vector3i CHUNK_SIZE = new Vector3i(Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE);
     public static final Vector3i INNER_CHUNK_POS_FILTER = new Vector3i(INNER_CHUNK_POS_FILTER_X, 0, INNER_CHUNK_POS_FILTER_Z);
 
     private final Vector3i pos = new Vector3i();
@@ -91,35 +94,23 @@ public class TeraChunk implements Externalizable {
     private ReentrantLock lock = new ReentrantLock();
     private boolean disposed = false;
 
-
-    public TeraChunk() {
-        blocks = new TeraArray(getChunkSizeX(), getChunkSizeY(), getChunkSizeZ());
-        sunlight = new TeraSmartArray(getChunkSizeX(), getChunkSizeY(), getChunkSizeZ());
-        light = new TeraSmartArray(getChunkSizeX(), getChunkSizeY(), getChunkSizeZ());
-        states = new TeraSmartArray(getChunkSizeX(), getChunkSizeY(), getChunkSizeZ());
+    private final SpoutChunk handle;
+    
+    public TeraChunk(SpoutChunk handle) {
+    	this.handle = handle;
+        blocks = new TeraArray(Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE);
+        sunlight = new TeraSmartArray(Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE);
+        light  = new TeraSmartArray(Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE);
+        states  = new TeraSmartArray(Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE);
 
         setDirty(true);
     }
 
-    public TeraChunk(int x, int y, int z) {
-        this();
+    public TeraChunk(SpoutChunk handle, int x, int y, int z) {
+        this(handle);
         pos.x = x;
         pos.y = y;
         pos.z = z;
-    }
-
-    public TeraChunk(Vector3i pos) {
-        this(pos.x, pos.y, pos.z);
-    }
-
-    public TeraChunk(TeraChunk other) {
-        pos.set(other.pos);
-        blocks = new TeraArray(other.blocks);
-        sunlight = new TeraSmartArray(other.sunlight);
-        light = new TeraSmartArray(other.light);
-        states = new TeraSmartArray(other.states);
-        chunkState = other.chunkState;
-        dirty = true;
     }
 
     public void lock() {
@@ -139,7 +130,7 @@ public class TeraChunk implements Externalizable {
     }
 
     public boolean isInBounds(int x, int y, int z) {
-        return x >= 0 && y >= 0 && z >= 0 && x < getChunkSizeX() && y < getChunkSizeY() && z < getChunkSizeZ();
+    	return handle.containsBlock(x, y, z);
     }
 
     public State getChunkState() {
@@ -274,15 +265,15 @@ public class TeraChunk implements Externalizable {
     }
 
     public int getChunkWorldPosX() {
-        return pos.x * getChunkSizeX();
+    	return handle.getBase().getBlockX();
     }
 
     public int getChunkWorldPosY() {
-        return pos.y * getChunkSizeY();
+    	return handle.getBase().getBlockY();
     }
 
     public int getChunkWorldPosZ() {
-        return pos.z * getChunkSizeZ();
+    	return handle.getBase().getBlockZ();
     }
 
     public Vector3i getBlockWorldPos(Vector3i blockPos) {
@@ -307,7 +298,7 @@ public class TeraChunk implements Externalizable {
 
     public AABB getAABB() {
         if (aabb == null) {
-            Vector3d dimensions = new Vector3d(getChunkSizeX() / 2.0, getChunkSizeY() / 2.0, getChunkSizeZ() / 2.0);
+            Vector3d dimensions = new Vector3d(Chunk.BLOCKS.HALF_SIZE, Chunk.BLOCKS.HALF_SIZE, Chunk.BLOCKS.HALF_SIZE);
             Vector3d position = new Vector3d(getChunkWorldPosX() + dimensions.x - 0.5f, dimensions.y - 0.5f, getChunkWorldPosZ() + dimensions.z - 0.5f);
             aabb = new AABB(position, dimensions);
         }
@@ -401,7 +392,7 @@ public class TeraChunk implements Externalizable {
         if (subMeshAABB == null) {
             subMeshAABB = new AABB[VERTICAL_SEGMENTS];
 
-            int heightHalf = SIZE_Y / VERTICAL_SEGMENTS / 2;
+            int heightHalf = Chunk.BLOCKS.SIZE / VERTICAL_SEGMENTS / 2;
 
             for (int i = 0; i < subMeshAABB.length; i++) {
                 Vector3d dimensions = new Vector3d(8, heightHalf, 8);
@@ -437,17 +428,5 @@ public class TeraChunk implements Externalizable {
 
     public boolean isDisposed() {
         return disposed;
-    }
-
-    public int getChunkSizeX() {
-        return SIZE_X;
-    }
-
-    public int getChunkSizeY() {
-        return SIZE_Y;
-    }
-
-    public int getChunkSizeZ() {
-        return SIZE_Z;
     }
 }

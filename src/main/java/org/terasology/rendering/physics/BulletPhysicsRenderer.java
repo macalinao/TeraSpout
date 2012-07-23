@@ -29,6 +29,7 @@ import javax.vecmath.Vector3f;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.spout.api.geo.cuboid.Chunk;
 import org.terasology.asset.AssetType;
 import org.terasology.asset.AssetUri;
 import org.terasology.components.CharacterMovementComponent;
@@ -286,7 +287,7 @@ public class BulletPhysicsRenderer implements IGameObject {
             Matrix3f rot = new Matrix3f();
             rot.setIdentity();
 
-            DefaultMotionState blockMotionState = new DefaultMotionState(new Transform(new Matrix4f(rot, new Vector3f((float) chunk.getPos().x * TeraChunk.SIZE_X, (float) chunk.getPos().y * TeraChunk.SIZE_Y, (float) chunk.getPos().z * TeraChunk.SIZE_Z), 1.0f)));
+            DefaultMotionState blockMotionState = new DefaultMotionState(new Transform(new Matrix4f(rot, new Vector3f((float) chunk.getPos().x * Chunk.BLOCKS.SIZE, (float) chunk.getPos().y * Chunk.BLOCKS.SIZE, (float) chunk.getPos().z * Chunk.BLOCKS.SIZE), 1.0f)));
 
             RigidBodyConstructionInfo blockConsInf = new RigidBodyConstructionInfo(0, blockMotionState, shape, new Vector3f());
             RigidBody rigidBody = new RigidBody(blockConsInf);

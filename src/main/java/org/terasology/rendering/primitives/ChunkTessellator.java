@@ -15,26 +15,24 @@
  */
 package org.terasology.rendering.primitives;
 
-import com.bulletphysics.collision.shapes.IndexedMesh;
-import com.bulletphysics.collision.shapes.ScalarType;
-import gnu.trove.iterator.TByteIterator;
 import gnu.trove.iterator.TFloatIterator;
 import gnu.trove.iterator.TIntIterator;
-import gnu.trove.iterator.TShortIterator;
+
+import javax.vecmath.Vector3f;
+import javax.vecmath.Vector4f;
+
 import org.lwjgl.BufferUtils;
+import org.spout.api.geo.cuboid.Chunk;
 import org.spout.engine.world.SpoutWorld;
-import org.terasology.logic.world.MiniatureChunk;
-import org.terasology.logic.world.WorldBiomeProvider;
 import org.terasology.logic.world.WorldView;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.Vector3i;
 import org.terasology.model.blocks.Block;
 import org.terasology.performanceMonitor.PerformanceMonitor;
-import org.terasology.teraspout.TeraChunk;
 
-import javax.vecmath.Vector3f;
-import javax.vecmath.Vector4f;
+import com.bulletphysics.collision.shapes.IndexedMesh;
+import com.bulletphysics.collision.shapes.ScalarType;
 
 /**
  * Generates tessellated chunk meshes from chunks.
@@ -57,10 +55,10 @@ public final class ChunkTessellator {
         PerformanceMonitor.startActivity("GenerateMesh");
         ChunkMesh mesh = new ChunkMesh();
 
-        Vector3i chunkOffset = new Vector3i(chunkPos.x * TeraChunk.SIZE_X, chunkPos.y * TeraChunk.SIZE_Y, chunkPos.z * TeraChunk.SIZE_Z);
+        Vector3i chunkOffset = new Vector3i(chunkPos.x * Chunk.BLOCKS.SIZE, chunkPos.y * Chunk.BLOCKS.SIZE, chunkPos.z * Chunk.BLOCKS.SIZE);
 
-        for (int x = 0; x < TeraChunk.SIZE_X; x++) {
-            for (int z = 0; z < TeraChunk.SIZE_Z; z++) {
+        for (int x = 0; x < Chunk.BLOCKS.SIZE; x++) {
+            for (int z = 0; z < Chunk.BLOCKS.SIZE; z++) {
 //                float biomeTemp = biomeProvider.getTemperatureAt(chunkOffset.x + x, chunkOffset.z + z);
 //                float biomeHumidity = biomeProvider.getHumidityAt(chunkOffset.x + x, chunkOffset.z + z);
 
@@ -76,34 +74,6 @@ public final class ChunkTessellator {
         }
 
         generateOptimizedBuffers(worldView, mesh);
-        _statVertexArrayUpdateCount++;
-
-        PerformanceMonitor.endActivity();
-        return mesh;
-    }
-
-    public ChunkMesh generateMinaturizedMesh(MiniatureChunk miniatureChunk) {
-        PerformanceMonitor.startActivity("GenerateMinuatureMesh");
-        ChunkMesh mesh = new ChunkMesh();
-
-        MiniatureChunk[] chunks = { miniatureChunk };
-        WorldView localWorldView = new WorldView(chunks, Region3i.createFromCenterExtents(Vector3i.zero(), Vector3i.zero()), Vector3i.zero());
-        localWorldView.setChunkSize(new Vector3i(MiniatureChunk.CHUNK_SIZE));
-
-        for (int x = 0; x < MiniatureChunk.SIZE_X; x++) {
-            for (int z = 0; z < MiniatureChunk.SIZE_Z; z++) {
-                for (int y = 0; y < MiniatureChunk.SIZE_Y; y++) {
-                    Block block = miniatureChunk.getBlock(x,y,z);
-
-                    if (block == null || block.isInvisible())
-                        continue;
-
-                    generateBlockVertices(localWorldView, mesh, x, y, z);
-                }
-            }
-        }
-
-        generateOptimizedBuffers(localWorldView, mesh);
         _statVertexArrayUpdateCount++;
 
         PerformanceMonitor.endActivity();

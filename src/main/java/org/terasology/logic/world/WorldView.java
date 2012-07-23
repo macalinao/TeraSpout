@@ -16,6 +16,7 @@
 
 package org.terasology.logic.world;
 
+import org.spout.api.geo.cuboid.Chunk;
 import org.terasology.math.Region3i;
 import org.terasology.math.TeraMath;
 import org.terasology.math.Vector3i;
@@ -67,7 +68,7 @@ public class WorldView {
         this.chunkRegion = chunkRegion;
         this.chunks = chunks;
         this.offset = offset;
-        setChunkSize(new Vector3i(TeraChunk.SIZE_X, TeraChunk.SIZE_Y, TeraChunk.SIZE_Z));
+        setChunkSize(new Vector3i(Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE));
     }
 
     public Region3i getChunkRegion() {

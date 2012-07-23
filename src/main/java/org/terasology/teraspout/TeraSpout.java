@@ -36,6 +36,7 @@ public class TeraSpout {
 	}
 
 	private TeraChunk loadChunk(SpoutChunk chunk) {
-		return null;
+		TeraChunk tc = new TeraChunk(chunk);
+		return tc;
 	}
 }

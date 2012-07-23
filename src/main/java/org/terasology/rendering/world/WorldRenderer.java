@@ -57,6 +57,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.spout.api.generator.biome.Biome;
 import org.spout.api.geo.World;
+import org.spout.api.geo.cuboid.Chunk;
 import org.spout.engine.world.SpoutChunk;
 import org.spout.engine.world.SpoutWorld;
 import org.terasology.componentSystem.RenderSystem;
@@ -279,7 +280,7 @@ public final class WorldRenderer implements IGameObject {
         }
 
         private float distanceToCamera(SpoutChunk chunk) {
-            Vector3f result = new Vector3f((chunk.getX() + 0.5f) * TeraChunk.SIZE_X, 0, (chunk.getZ() + 0.5f) * TeraChunk.SIZE_Z);
+            Vector3f result = new Vector3f((chunk.getX() + 0.5f) * Chunk.BLOCKS.SIZE, 0, (chunk.getZ() + 0.5f) * Chunk.BLOCKS.SIZE);
 
             Vector3d cameraPos = CoreRegistry.get(WorldRenderer.class).getActiveCamera().getPosition();
             result.x -= cameraPos.x;
@@ -558,14 +559,14 @@ public final class WorldRenderer implements IGameObject {
         if (chunk.getChunkState() == TeraChunk.State.COMPLETE && chunk.getMesh() != null) {
             ShaderProgram shader = ShaderManager.getInstance().getShaderProgram("chunk");
             // Transfer the world offset of the chunk to the shader for various effects
-            shader.setFloat3("chunkOffset", (float) (chunk.getPos().x * TeraChunk.SIZE_X), (float) (chunk.getPos().y * TeraChunk.SIZE_Y), (float) (chunk.getPos().z * TeraChunk.SIZE_Z));
+            shader.setFloat3("chunkOffset", (float) (chunk.getPos().x * Chunk.BLOCKS.SIZE), (float) (chunk.getPos().y * Chunk.BLOCKS.SIZE), (float) (chunk.getPos().z * Chunk.BLOCKS.SIZE));
             shader.setFloat("animated", chunk.getAnimated() ? 1.0f: 0.0f);
             shader.setFloat("clipHeight", camera.getClipHeight());
 
             GL11.glPushMatrix();
 
             Vector3d cameraPosition = camera.getPosition();
-            GL11.glTranslated(chunk.getPos().x * TeraChunk.SIZE_X - cameraPosition.x, chunk.getPos().y * TeraChunk.SIZE_Y - cameraPosition.y, chunk.getPos().z * TeraChunk.SIZE_Z - cameraPosition.z);
+            GL11.glTranslated(chunk.getPos().x * Chunk.BLOCKS.SIZE - cameraPosition.x, chunk.getPos().y * Chunk.BLOCKS.SIZE - cameraPosition.y, chunk.getPos().z * Chunk.BLOCKS.SIZE - cameraPosition.z);
 
             for (int i = 0; i < VERTICAL_SEGMENTS; i++) {
                 if (!chunk.getMesh()[i].isEmpty()) {
@@ -664,7 +665,7 @@ public final class WorldRenderer implements IGameObject {
      * @return The player offset on the x-axis
      */
     private int calcCamChunkOffsetX() {
-        return (int) (getActiveCamera().getPosition().x / TeraChunk.SIZE_X);
+        return (int) (getActiveCamera().getPosition().x / Chunk.BLOCKS.SIZE);
     }
 
     /**
@@ -673,7 +674,7 @@ public final class WorldRenderer implements IGameObject {
      * @return The player offset on the z-axis
      */
     private int calcCamChunkOffsetZ() {
-        return (int) (getActiveCamera().getPosition().z / TeraChunk.SIZE_Z);
+        return (int) (getActiveCamera().getPosition().z / Chunk.BLOCKS.SIZE);
     }
 
     /**

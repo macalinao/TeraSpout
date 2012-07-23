@@ -18,6 +18,7 @@ package org.terasology.rendering.world;
 import java.util.Set;
 
 import org.spout.api.geo.World;
+import org.spout.api.geo.cuboid.Chunk;
 import org.terasology.game.CoreRegistry;
 import org.terasology.game.TerasologyEngine;
 import org.terasology.logic.manager.Config;
@@ -86,7 +87,7 @@ public final class ChunkUpdateManager {
                 if (worldView != null) {
                     c.setDirty(false);
                     for (int seg = 0; seg < WorldRenderer.VERTICAL_SEGMENTS; seg++) {
-                        newMeshes[seg] = tessellator.generateMesh(worldView, c.getPos(), TeraChunk.SIZE_Y / WorldRenderer.VERTICAL_SEGMENTS, seg * (TeraChunk.SIZE_Y / WorldRenderer.VERTICAL_SEGMENTS));
+                        newMeshes[seg] = tessellator.generateMesh(worldView, c.getPos(), Chunk.BLOCKS.SIZE / WorldRenderer.VERTICAL_SEGMENTS, seg * (Chunk.BLOCKS.SIZE / WorldRenderer.VERTICAL_SEGMENTS));
                     }
 
                     c.setPendingMesh(newMeshes);
