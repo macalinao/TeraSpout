@@ -50,9 +50,7 @@ import com.google.common.base.Objects;
  *
  * @author Benjamin Glatzel <benjamin.glatzel@me.com>
  */
-public class TeraChunk implements Externalizable {
-    public static final long serialVersionUID = 79881925217704826L;
-
+public class TeraChunk {
     public enum State {
         ADJACENCY_GENERATION_PENDING,
         INTERNAL_LIGHT_GENERATION_PENDING,
@@ -72,8 +70,6 @@ public class TeraChunk implements Externalizable {
     public static final Vector3i CHUNK_POWER = new Vector3i(POWER_X, 0, POWER_Z);
     public static final Vector3i CHUNK_SIZE = new Vector3i(Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE, Chunk.BLOCKS.SIZE);
     public static final Vector3i INNER_CHUNK_POS_FILTER = new Vector3i(INNER_CHUNK_POS_FILTER_X, 0, INNER_CHUNK_POS_FILTER_Z);
-
-    private final Vector3i pos = new Vector3i();
 
     protected TeraArray blocks;
     protected TeraSmartArray sunlight, light, states;
@@ -106,13 +102,6 @@ public class TeraChunk implements Externalizable {
         setDirty(true);
     }
 
-    public TeraChunk(SpoutChunk handle, int x, int y, int z) {
-        this(handle);
-        pos.x = x;
-        pos.y = y;
-        pos.z = z;
-    }
-
     public void lock() {
         lock.lock();
     }
@@ -126,7 +115,7 @@ public class TeraChunk implements Externalizable {
     }
 
     public Vector3i getPos() {
-        return new Vector3i(pos);
+        return new Vector3i(handle.getBlockX(), handle.getBlockY(), handle.getBlockZ());
     }
 
     public boolean isInBounds(int x, int y, int z) {
@@ -306,57 +295,14 @@ public class TeraChunk implements Externalizable {
         return aabb;
     }
 
-    // TODO: Protobuf instead???
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeInt(pos.x);
-        out.writeInt(pos.y);
-        out.writeInt(pos.z);
-
-        out.writeObject(chunkState);
-
-        for (int i = 0; i < blocks.size(); i++)
-            out.writeByte(blocks.getRawByte(i));
-
-        for (int i = 0; i < sunlight.sizePacked(); i++)
-            out.writeByte(sunlight.getRawByte(i));
-
-        for (int i = 0; i < light.sizePacked(); i++)
-            out.writeByte(light.getRawByte(i));
-
-        for (int i = 0; i < states.sizePacked(); i++)
-            out.writeByte(states.getRawByte(i));
-    }
-
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        pos.x = in.readInt();
-        pos.y = in.readInt();
-        pos.z = in.readInt();
-
-        // Parse the flags...
-        setDirty(true);
-        chunkState = (State) in.readObject();
-
-        for (int i = 0; i < blocks.size(); i++)
-            blocks.setRawByte(i, in.readByte());
-
-        for (int i = 0; i < sunlight.sizePacked(); i++)
-            sunlight.setRawByte(i, in.readByte());
-
-        for (int i = 0; i < light.sizePacked(); i++)
-            light.setRawByte(i, in.readByte());
-
-        for (int i = 0; i < states.sizePacked(); i++)
-            states.setRawByte(i, in.readByte());
-    }
-
     @Override
     public String toString() {
-        return "Chunk" + pos.toString();
+        return "Chunk " + handle.getBase().toString();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(pos);
+        return Objects.hashCode(handle.getBase());
     }
 
     public void setMesh(ChunkMesh[] mesh) {
