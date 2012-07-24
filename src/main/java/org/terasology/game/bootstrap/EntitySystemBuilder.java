@@ -62,7 +62,6 @@ public class EntitySystemBuilder {
     }
 
     private void registerTypeHandlers(ComponentLibrary library) {
-        library.registerTypeHandler(BlockFamily.class, new BlockFamilyTypeHandler());
         library.registerTypeHandler(Color4f.class, new Color4fTypeHandler());
         library.registerTypeHandler(Quat4f.class, new Quat4fTypeHandler());
         library.registerTypeHandler(Mesh.class, new AssetTypeHandler(AssetType.MESH, Mesh.class));

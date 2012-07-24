@@ -1,9 +1,13 @@
 package org.terasology.teraspout;
 
-import java.util.HashMap;
+import gnu.trove.map.TShortObjectMap;
+import gnu.trove.map.hash.TShortObjectHashMap;
+
 import java.util.WeakHashMap;
 
+import org.spout.api.Spout;
 import org.spout.api.material.BlockMaterial;
+import org.spout.api.material.MaterialRegistry;
 import org.spout.engine.world.SpoutChunk;
 import org.terasology.game.TerasologyEngine;
 
@@ -17,17 +21,18 @@ import org.terasology.game.TerasologyEngine;
  */
 public class TeraSpout {
 	private static TeraSpout _instance;
-	
+
 	private WeakHashMap<SpoutChunk, TeraChunk> chunks = new WeakHashMap<SpoutChunk, TeraChunk>();
-	private HashMap<BlockMaterial, TeraBlock> blocks = new HashMap<BlockMaterial, TeraBlock>();
-	
+	private TeraBlock[] blocks = new TeraBlock[1 << 16]; // store the blocks by
+															// id
+
 	private final TerasologyEngine engine;
 
 	public TeraSpout(TerasologyEngine engine) {
 		_instance = this;
 		this.engine = engine;
 	}
-	
+
 	public static TeraSpout getInstance() {
 		return _instance;
 	}
@@ -50,16 +55,20 @@ public class TeraSpout {
 		TeraChunk tc = new TeraChunk(chunk);
 		return tc;
 	}
-	
-	public TeraBlock getBlock(BlockMaterial mat) {
-		TeraBlock b = blocks.get(mat);
+
+	public TeraBlock getBlock(short mat) {
+		TeraBlock b = blocks[mat];
 		if (b == null) {
-			b = loadBlock(mat);
+			blocks[mat] = b = loadBlock(mat);
 		}
 		return b;
 	}
-	
-	private TeraBlock loadBlock(BlockMaterial mat) {
-		return null; // todo
+
+	public TeraBlock getBlock(BlockMaterial mat) {
+		return getBlock(mat.getId());
+	}
+
+	private TeraBlock loadBlock(short mat) {
+		return new TeraBlock((BlockMaterial) MaterialRegistry.get(mat));
 	}
 }
