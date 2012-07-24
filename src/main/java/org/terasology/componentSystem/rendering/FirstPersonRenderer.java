@@ -17,7 +17,6 @@ import org.terasology.logic.manager.ShaderManager;
 import org.terasology.logic.world.WorldProvider;
 import org.terasology.math.Side;
 import org.terasology.math.TeraMath;
-import org.terasology.model.blocks.Block;
 import org.terasology.model.blocks.BlockFamily;
 import org.terasology.model.inventory.Icon;
 import org.terasology.rendering.assets.Texture;
@@ -27,6 +26,7 @@ import org.terasology.rendering.primitives.Tessellator;
 import org.terasology.rendering.primitives.TessellatorHelper;
 import org.terasology.rendering.shader.ShaderProgram;
 import org.terasology.rendering.world.WorldRenderer;
+import org.terasology.teraspout.TeraBlock;
 
 import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3f;
@@ -149,7 +149,7 @@ public class FirstPersonRenderer implements RenderSystem {
     }
 
     private void renderBlock(BlockFamily blockFamily, float bobOffset, float handMovementAnimationOffset) {
-        Block activeBlock = blockFamily.getArchetypeBlock();
+        TeraBlock activeBlock = blockFamily.getArchetypeBlock();
         Vector3f playerPos = localPlayer.getPosition();
 
         // Adjust the brightness of the block according to the current position of the player

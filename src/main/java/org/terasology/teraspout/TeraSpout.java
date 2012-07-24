@@ -6,7 +6,6 @@ import java.util.WeakHashMap;
 import org.spout.api.material.BlockMaterial;
 import org.spout.engine.world.SpoutChunk;
 import org.terasology.game.TerasologyEngine;
-import org.terasology.model.blocks.Block;
 
 /**
  * TeraSpout. Links server-side objects with client concepts.
@@ -20,7 +19,7 @@ public class TeraSpout {
 	private static TeraSpout _instance;
 	
 	private WeakHashMap<SpoutChunk, TeraChunk> chunks = new WeakHashMap<SpoutChunk, TeraChunk>();
-	private HashMap<BlockMaterial, Block> blocks = new HashMap<BlockMaterial, Block>();
+	private HashMap<BlockMaterial, TeraBlock> blocks = new HashMap<BlockMaterial, TeraBlock>();
 	
 	private final TerasologyEngine engine;
 
@@ -52,15 +51,15 @@ public class TeraSpout {
 		return tc;
 	}
 	
-	public Block getBlock(BlockMaterial mat) {
-		Block b = blocks.get(mat);
+	public TeraBlock getBlock(BlockMaterial mat) {
+		TeraBlock b = blocks.get(mat);
 		if (b == null) {
 			b = loadBlock(mat);
 		}
 		return b;
 	}
 	
-	private Block loadBlock(BlockMaterial mat) {
+	private TeraBlock loadBlock(BlockMaterial mat) {
 		return null; // todo
 	}
 }

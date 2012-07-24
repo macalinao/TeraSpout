@@ -1,6 +1,7 @@
 package org.terasology.model.blocks;
 
 import org.terasology.math.Side;
+import org.terasology.teraspout.TeraBlock;
 
 /**
  * A collection of blocks that are all different rotations of the same core block.
@@ -23,7 +24,7 @@ public interface BlockFamily {
      * @param direction      A secondary direction after the attachment side that determines the facing of the block.
      * @return The id of the appropriate block
      */
-    byte getBlockIdFor(Side attachmentSide, Side direction);
+    short getBlockIdFor(Side attachmentSide, Side direction);
 
     /**
      * Get the block that is appropriate for placement in the given situation
@@ -32,10 +33,10 @@ public interface BlockFamily {
      * @param direction      A secondary direction after the attachment side that determines the facing of the block.
      * @return The appropriate block
      */
-    Block getBlockFor(Side attachmentSide, Side direction);
+    TeraBlock getBlockFor(Side attachmentSide, Side direction);
 
     /**
      * @return The base block defining the block group. Can be used for orientation-irrelevant behaviours
      */
-    Block getArchetypeBlock();
+    TeraBlock getArchetypeBlock();
 }

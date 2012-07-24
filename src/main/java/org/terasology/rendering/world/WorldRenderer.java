@@ -77,7 +77,6 @@ import org.terasology.logic.world.ChunkStore;
 import org.terasology.logic.world.WorldProvider;
 import org.terasology.math.Rect2i;
 import org.terasology.math.TeraMath;
-import org.terasology.model.blocks.Block;
 import org.terasology.model.structures.AABB;
 import org.terasology.performanceMonitor.PerformanceMonitor;
 import org.terasology.rendering.cameras.Camera;
@@ -87,6 +86,7 @@ import org.terasology.rendering.physics.BulletPhysicsRenderer;
 import org.terasology.rendering.primitives.ChunkMesh;
 import org.terasology.rendering.primitives.ChunkTessellator;
 import org.terasology.rendering.shader.ShaderProgram;
+import org.terasology.teraspout.TeraBlock;
 import org.terasology.teraspout.TeraChunk;
 
 import com.google.common.collect.Lists;
@@ -184,6 +184,10 @@ public final class WorldRenderer implements IGameObject {
         // TODO: won't need localPlayerSystem here once camera is in the ES proper
         localPlayerSystem.setPlayerCamera(_defaultCamera);
         _systemManager = CoreRegistry.get(ComponentSystemManager.class);
+    }
+    
+    public TerasologyEngine getEngine() {
+    	return engine;
     }
 
     /**
@@ -627,7 +631,7 @@ public final class WorldRenderer implements IGameObject {
 
     private boolean isUnderwater() {
         Vector3d cameraPos = CoreRegistry.get(WorldRenderer.class).getActiveCamera().getPosition();
-        Block block = CoreRegistry.get(WorldProvider.class).getBlock(new Vector3f(cameraPos));
+        TeraBlock block = CoreRegistry.get(WorldProvider.class).getBlock(new Vector3f(cameraPos));
         return block.isLiquid();
     }
 

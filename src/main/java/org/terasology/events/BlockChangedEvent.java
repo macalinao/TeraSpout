@@ -18,7 +18,7 @@ package org.terasology.events;
 
 import org.terasology.entitySystem.AbstractEvent;
 import org.terasology.math.Vector3i;
-import org.terasology.model.blocks.Block;
+import org.terasology.teraspout.TeraBlock;
 
 /**
  * Event when a block has changed
@@ -26,11 +26,11 @@ import org.terasology.model.blocks.Block;
  * @author Immortius
  */
 public class BlockChangedEvent extends AbstractEvent {
-    private Block oldType;
-    private Block newType;
+    private TeraBlock oldType;
+    private TeraBlock newType;
     private Vector3i blockPosition;
 
-    public BlockChangedEvent(Vector3i pos, Block newType, Block oldType) {
+    public BlockChangedEvent(Vector3i pos, TeraBlock newType, TeraBlock oldType) {
         this.blockPosition = new Vector3i(pos);
         this.oldType = oldType;
         this.newType = newType;
@@ -40,11 +40,11 @@ public class BlockChangedEvent extends AbstractEvent {
         return blockPosition;
     }
 
-    public Block getOldType() {
+    public TeraBlock getOldType() {
         return oldType;
     }
 
-    public Block getNewType() {
+    public TeraBlock getNewType() {
         return newType;
     }
 }

@@ -26,7 +26,7 @@ import org.terasology.math.Diamond3iIterator;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.Vector3i;
-import org.terasology.model.blocks.Block;
+import org.terasology.teraspout.TeraBlock;
 import org.terasology.teraspout.TeraChunk;
 
 import com.google.common.collect.Lists;
@@ -76,7 +76,7 @@ public class LightPropagator {
      * @param oldType The old block type
      * @return The region affected by the light update
      */
-    public Region3i update(Vector3i pos, Block type, Block oldType) {
+    public Region3i update(Vector3i pos, TeraBlock type, TeraBlock oldType) {
         return update(pos.x, pos.y, pos.z, type, oldType);
     }
 
@@ -90,11 +90,11 @@ public class LightPropagator {
      * @param oldType The old block type
      * @return The region affected by the light update
      */
-    public Region3i update(int x, int y, int z, Block type, Block oldType) {
+    public Region3i update(int x, int y, int z, TeraBlock type, TeraBlock oldType) {
         return Region3i.createEncompassing(updateSunlight(x, y, z, type, oldType), updateLight(x, y, z, type, oldType));
     }
 
-    private Region3i updateSunlight(int x, int y, int z, Block type, Block oldType) {
+    private Region3i updateSunlight(int x, int y, int z, TeraBlock type, TeraBlock oldType) {
         if (type.isTranslucent() == oldType.isTranslucent()) {
             return Region3i.EMPTY;
         }
@@ -110,7 +110,7 @@ public class LightPropagator {
         return Region3i.EMPTY;
     }
 
-    private Region3i updateLight(int x, int y, int z, Block type, Block oldType) {
+    private Region3i updateLight(int x, int y, int z, TeraBlock type, TeraBlock oldType) {
         byte currentLight = worldView.getLight(x, y, z);
         byte lum = type.getLuminance();
 
@@ -164,7 +164,7 @@ public class LightPropagator {
         // First drop MAX_LIGHT until it is blocked
         if (lightLevel == TeraChunk.MAX_LIGHT && worldView.getSunlight(x, y - 1, z) < TeraChunk.MAX_LIGHT) {
             for (int columnY = y - 1; columnY >= 0; columnY--) {
-                Block block = worldView.getBlock(x, columnY, z);
+                TeraBlock block = worldView.getBlock(x, columnY, z);
                 if (sunlightRetainsFullStrengthIn(block)) {
                     worldView.setSunlight(x, columnY, z, lightLevel);
                     nextWave.add(new Vector3i(x, columnY, z));
@@ -188,7 +188,7 @@ public class LightPropagator {
                     // Move sunlight up
                     if (pos.y < Chunk.BLOCKS.SIZE - 2) {
                         Vector3i adjPos = new Vector3i(pos.x, pos.y + 1, pos.z);
-                        Block block = worldView.getBlock(adjPos);
+                        TeraBlock block = worldView.getBlock(adjPos);
                         if (block.isTranslucent()) {
                             byte adjLight = worldView.getSunlight(adjPos);
                             if (adjLight < lightLevel - 1) {
@@ -204,7 +204,7 @@ public class LightPropagator {
                 // Move sunlight down
                 if (pos.y > 0) {
                     Vector3i adjPos = new Vector3i(pos.x, pos.y - 1, pos.z);
-                    Block block = worldView.getBlock(adjPos);
+                    TeraBlock block = worldView.getBlock(adjPos);
                     if (block.isTranslucent()) {
                         byte adjLight = worldView.getSunlight(adjPos);
                         if (adjLight < lightLevel - 1) {
@@ -222,7 +222,7 @@ public class LightPropagator {
                     adjPos.add(side.getVector3i());
 
                     try {
-                        Block block = worldView.getBlock(adjPos);
+                        TeraBlock block = worldView.getBlock(adjPos);
 
                         if (block.isTranslucent()) {
                             byte adjLight = worldView.getSunlight(adjPos);
@@ -263,7 +263,7 @@ public class LightPropagator {
                         continue;
                     }
 
-                    Block block = worldView.getBlock(adjPos);
+                    TeraBlock block = worldView.getBlock(adjPos);
                     if (block.isTranslucent()) {
                         byte adjLight = worldView.getLight(adjPos);
                         if (adjLight < lightLevel - 1) {
@@ -351,7 +351,7 @@ public class LightPropagator {
                 byte aboveLight = worldView.getSunlight(x + region.min().x, y + 1, z + region.min().z);
                 if (aboveLight == TeraChunk.MAX_LIGHT) {
                     for (; y >= 0; y--) {
-                        Block block = worldView.getBlock(x + region.min().x, y, z + region.min().z);
+                        TeraBlock block = worldView.getBlock(x + region.min().x, y, z + region.min().z);
                         if (sunlightRetainsFullStrengthIn(block)) {
                             worldView.setSunlight(x + region.min().x, y, z + region.min().z, TeraChunk.MAX_LIGHT);
                         } else {
@@ -413,7 +413,7 @@ public class LightPropagator {
         }
     }
 
-    private boolean sunlightRetainsFullStrengthIn(Block block) {
+    private boolean sunlightRetainsFullStrengthIn(TeraBlock block) {
         return block.isTranslucent() && !block.isLiquid();
     }
 

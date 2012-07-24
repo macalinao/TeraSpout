@@ -28,8 +28,8 @@ import org.terasology.logic.world.WorldView;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.Vector3i;
-import org.terasology.model.blocks.Block;
 import org.terasology.performanceMonitor.PerformanceMonitor;
+import org.terasology.teraspout.TeraBlock;
 
 import com.bulletphysics.collision.shapes.IndexedMesh;
 import com.bulletphysics.collision.shapes.ScalarType;
@@ -63,7 +63,7 @@ public final class ChunkTessellator {
 //                float biomeHumidity = biomeProvider.getHumidityAt(chunkOffset.x + x, chunkOffset.z + z);
 
                 for (int y = verticalOffset; y < verticalOffset + meshHeight; y++) {
-                    Block block = worldView.getBlock(x, y, z);
+                    TeraBlock block = worldView.getBlock(x, y, z);
 
                     if (block == null || block.isInvisible())
                         continue;
@@ -156,7 +156,7 @@ public final class ChunkTessellator {
         PerformanceMonitor.startActivity("calcLighting");
         float[] lights = new float[8];
         float[] blockLights = new float[8];
-        Block[] blocks = new Block[4];
+        TeraBlock[] blocks = new TeraBlock[4];
 
         PerformanceMonitor.startActivity("gatherLightInfo");
         blocks[0] = worldView.getBlock((vertexPos.x + 0.1f), (vertexPos.y + 0.8f), (vertexPos.z + 0.1f));
@@ -203,11 +203,11 @@ public final class ChunkTessellator {
             }
 
             if (i < 4) {
-                Block b = blocks[i];
+                TeraBlock b = blocks[i];
 
-                if (b.isCastsShadows() && b.getBlockForm() != Block.BLOCK_FORM.BILLBOARD) {
+                if (b.isCastsShadows() && b.getBlockForm() != TeraBlock.BLOCK_FORM.BILLBOARD) {
                     occCounter++;
-                } else if (b.isCastsShadows() && b.getBlockForm() == Block.BLOCK_FORM.BILLBOARD) {
+                } else if (b.isCastsShadows() && b.getBlockForm() == TeraBlock.BLOCK_FORM.BILLBOARD) {
                     occCounterBillboard++;
                 }
             }
@@ -230,7 +230,7 @@ public final class ChunkTessellator {
     }
 
     private void generateBlockVertices(WorldView view, ChunkMesh mesh, int x, int y, int z) {
-        Block block = view.getBlock(x, y, z);
+        TeraBlock block = view.getBlock(x, y, z);
 
         /*
          * Determine the render process.
@@ -241,10 +241,10 @@ public final class ChunkTessellator {
             renderType = ChunkMesh.RENDER_TYPE.OPAQUE;
         if (block.getTitle().equals("Water") || block.getTitle().equals("Ice"))
             renderType = ChunkMesh.RENDER_TYPE.WATER_AND_ICE;
-        if (block.getBlockForm() == Block.BLOCK_FORM.BILLBOARD)
+        if (block.getBlockForm() == TeraBlock.BLOCK_FORM.BILLBOARD)
             renderType = ChunkMesh.RENDER_TYPE.BILLBOARD;
 
-        Block.BLOCK_FORM blockForm = block.getBlockForm();
+        TeraBlock.BLOCK_FORM blockForm = block.getBlockForm();
 
         if (block.getCenterMesh() != null) {
             Vector4f colorOffset = block.calcColorOffsetFor(Side.TOP);
@@ -255,7 +255,7 @@ public final class ChunkTessellator {
 
         for (Side side : Side.values()) {
             Vector3i offset = side.getVector3i();
-            Block blockToCheck = view.getBlock(x + offset.x, y + offset.y, z + offset.z);
+            TeraBlock blockToCheck = view.getBlock(x + offset.x, y + offset.y, z + offset.z);
             drawDir[side.ordinal()] = isSideVisibleForBlockTypes(blockToCheck, block, side);
         }
 
@@ -264,21 +264,21 @@ public final class ChunkTessellator {
         }
 
         // If the block is lowered, some more faces may have to be drawn
-        if (blockForm == Block.BLOCK_FORM.LOWERED_BLOCK) {
+        if (blockForm == TeraBlock.BLOCK_FORM.LOWERED_BLOCK) {
             // Draw horizontal sides if visible from below
             for (Side side : Side.horizontalSides()) {
                 Vector3i offset = side.getVector3i();
-                Block blockToCheck = view.getBlock(x + offset.x, y - 1, z + offset.z);
+                TeraBlock blockToCheck = view.getBlock(x + offset.x, y - 1, z + offset.z);
                 drawDir[side.ordinal()] |= isSideVisibleForBlockTypes(blockToCheck, block, side);
             }
 
             // Draw the top if below a non-lowered block
             // TODO: Don't need to render the top if each side and the block above each side are either liquid or opaque solids.
-            Block blockToCheck = view.getBlock(x, y + 1, z);
-            drawDir[Side.TOP.ordinal()] |= blockToCheck.getBlockForm() != Block.BLOCK_FORM.LOWERED_BLOCK;
+            TeraBlock blockToCheck = view.getBlock(x, y + 1, z);
+            drawDir[Side.TOP.ordinal()] |= blockToCheck.getBlockForm() != TeraBlock.BLOCK_FORM.LOWERED_BLOCK;
 
-            Block bottomBlock = view.getBlock(x, y - 1, z);
-            if (bottomBlock.getBlockForm() == Block.BLOCK_FORM.LOWERED_BLOCK || bottomBlock.getId() == 0x0) {
+            TeraBlock bottomBlock = view.getBlock(x, y - 1, z);
+            if (bottomBlock.getBlockForm() == TeraBlock.BLOCK_FORM.LOWERED_BLOCK || bottomBlock.getId() == 0x0) {
                 for (Side dir : Side.values()) {
                     if (drawDir[dir.ordinal()]) {
                         Vector4f colorOffset = block.calcColorOffsetFor(dir);
@@ -304,7 +304,7 @@ public final class ChunkTessellator {
      * @param currentBlock The current block
      * @return True if the side is visible for the given block types
      */
-    private boolean isSideVisibleForBlockTypes(Block blockToCheck, Block currentBlock, Side side) {
+    private boolean isSideVisibleForBlockTypes(TeraBlock blockToCheck, TeraBlock currentBlock, Side side) {
         if (currentBlock.getSideMesh(side) == null) return false;
 
         // Liquids can be transparent but there should be no visible adjacent faces

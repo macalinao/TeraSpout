@@ -17,7 +17,7 @@
 package org.terasology.logic.world;
 
 import org.terasology.math.Vector3i;
-import org.terasology.model.blocks.Block;
+import org.terasology.teraspout.TeraBlock;
 
 import javax.vecmath.Vector3f;
 
@@ -43,7 +43,7 @@ public class WorldProviderWrapper extends AbstractWorldProviderDecorator impleme
     }
 
     @Override
-    public boolean setBlock(Vector3i pos, Block type, Block oldType) {
+    public boolean setBlock(Vector3i pos, TeraBlock type, TeraBlock oldType) {
         return core.setBlock(pos.x, pos.y, pos.z, type, oldType);
     }
 
@@ -58,12 +58,12 @@ public class WorldProviderWrapper extends AbstractWorldProviderDecorator impleme
     }
 
     @Override
-    public Block getBlock(Vector3f pos) {
+    public TeraBlock getBlock(Vector3f pos) {
         return getBlock(new Vector3i(pos, 0.5f));
     }
 
     @Override
-    public Block getBlock(Vector3i pos) {
+    public TeraBlock getBlock(Vector3i pos) {
         return core.getBlock(pos.x, pos.y, pos.z);
     }
 

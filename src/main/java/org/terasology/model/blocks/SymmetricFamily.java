@@ -1,6 +1,7 @@
 package org.terasology.model.blocks;
 
 import org.terasology.math.Side;
+import org.terasology.teraspout.TeraBlock;
 
 /**
  * The standard block group consisting of a single symmetrical block that doesn't need rotations
@@ -9,9 +10,9 @@ import org.terasology.math.Side;
  */
 public class SymmetricFamily implements BlockFamily {
 
-    Block block;
+    TeraBlock block;
 
-    public SymmetricFamily(Block block) {
+    public SymmetricFamily(TeraBlock block) {
         this.block = block;
         block.withBlockFamily(this);
     }
@@ -20,15 +21,15 @@ public class SymmetricFamily implements BlockFamily {
         return block.getTitle();
     }
 
-    public byte getBlockIdFor(Side attachmentSide, Side direction) {
+    public short getBlockIdFor(Side attachmentSide, Side direction) {
         return block.getId();
     }
 
-    public Block getBlockFor(Side attachmentSide, Side direction) {
+    public TeraBlock getBlockFor(Side attachmentSide, Side direction) {
         return block;
     }
 
-    public Block getArchetypeBlock() {
+    public TeraBlock getArchetypeBlock() {
         return block;
     }
 }

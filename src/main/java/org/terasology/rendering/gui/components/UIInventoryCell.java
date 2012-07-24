@@ -25,12 +25,12 @@ import org.terasology.entitySystem.EntityRef;
 import org.terasology.game.CoreRegistry;
 import org.terasology.logic.LocalPlayer;
 import org.terasology.logic.manager.AssetManager;
-import org.terasology.model.blocks.Block;
 import org.terasology.model.blocks.BlockFamily;
 import org.terasology.model.inventory.Icon;
 import org.terasology.rendering.assets.Texture;
 import org.terasology.rendering.gui.framework.UIDisplayElement;
 import org.terasology.rendering.gui.framework.UIGraphicsElement;
+import org.terasology.teraspout.TeraBlock;
 
 import javax.vecmath.Vector2f;
 
@@ -203,7 +203,7 @@ public class UIInventoryCell extends UIDisplayElement {
         glBindTexture(GL11.GL_TEXTURE_2D, terrainTex.getId());
         ;
 
-        Block block = blockFamily.getArchetypeBlock();
+        TeraBlock block = blockFamily.getArchetypeBlock();
         block.render();
 
         GL11.glPopMatrix();

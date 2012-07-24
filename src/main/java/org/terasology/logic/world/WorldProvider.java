@@ -16,7 +16,7 @@
 package org.terasology.logic.world;
 
 import org.terasology.math.Vector3i;
-import org.terasology.model.blocks.Block;
+import org.terasology.teraspout.TeraBlock;
 
 import javax.vecmath.Vector3f;
 
@@ -45,7 +45,7 @@ public interface WorldProvider extends WorldProviderCore {
      * @param type The type of the block to set
      * @return True if a block was set/replaced. Will fail of oldType != the current type, or if the underlying chunk is not available
      */
-    public boolean setBlock(Vector3i pos, Block type, Block oldType);
+    public boolean setBlock(Vector3i pos, TeraBlock type, TeraBlock oldType);
 
     /**
      * @param pos
@@ -69,7 +69,7 @@ public interface WorldProvider extends WorldProviderCore {
      * @param pos The position
      * @return The block value at the given position
      */
-    public Block getBlock(Vector3f pos);
+    public TeraBlock getBlock(Vector3f pos);
 
     /**
      * Returns the block value at the given position.
@@ -77,7 +77,7 @@ public interface WorldProvider extends WorldProviderCore {
      * @param pos The position
      * @return The block value at the given position
      */
-    public Block getBlock(Vector3i pos);
+    public TeraBlock getBlock(Vector3i pos);
 
     /**
      * Returns the light value at the given position.

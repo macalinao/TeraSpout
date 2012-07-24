@@ -30,6 +30,8 @@ import javax.vecmath.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.spout.api.geo.cuboid.Chunk;
+import org.spout.api.material.BlockMaterial;
+import org.spout.api.material.MaterialRegistry;
 import org.terasology.asset.AssetType;
 import org.terasology.asset.AssetUri;
 import org.terasology.components.CharacterMovementComponent;
@@ -43,12 +45,12 @@ import org.terasology.entitySystem.PrefabManager;
 import org.terasology.events.inventory.ReceiveItemEvent;
 import org.terasology.game.CoreRegistry;
 import org.terasology.logic.manager.AudioManager;
-import org.terasology.model.blocks.Block;
-import org.terasology.model.blocks.management.BlockManager;
 import org.terasology.rendering.interfaces.IGameObject;
 import org.terasology.rendering.primitives.ChunkMesh;
 import org.terasology.rendering.world.WorldRenderer;
+import org.terasology.teraspout.TeraBlock;
 import org.terasology.teraspout.TeraChunk;
+import org.terasology.teraspout.TeraSpout;
 import org.terasology.utilities.FastRandom;
 
 import com.beust.jcommander.internal.Lists;
@@ -76,13 +78,13 @@ import com.bulletphysics.linearmath.Transform;
 public class BulletPhysicsRenderer implements IGameObject {
 
     private class BlockRigidBody extends RigidBody implements Comparable<BlockRigidBody> {
-        private final byte _type;
+        private final short _type;
         private final long _createdAt;
 
         public boolean _temporary = false;
         public boolean _picked = false;
 
-        public BlockRigidBody(RigidBodyConstructionInfo constructionInfo, byte type) {
+        public BlockRigidBody(RigidBodyConstructionInfo constructionInfo, short type) {
             super(constructionInfo);
             _type = type;
             _createdAt = System.currentTimeMillis();
@@ -103,7 +105,7 @@ public class BulletPhysicsRenderer implements IGameObject {
             return System.currentTimeMillis() - _createdAt;
         }
 
-        public byte getType() {
+        public short getType() {
             return _type;
         }
 
@@ -159,7 +161,7 @@ public class BulletPhysicsRenderer implements IGameObject {
         _blockItemFactory = new BlockItemFactory(CoreRegistry.get(EntityManager.class), CoreRegistry.get(PrefabManager.class));
     }
 
-    public BlockRigidBody[] addLootableBlocks(Vector3f position, Block block) {
+    public BlockRigidBody[] addLootableBlocks(Vector3f position, TeraBlock block) {
         BlockRigidBody result[] = new BlockRigidBody[8];
         for (int i = 0; i < block.getLootAmount(); i++) {
             // Position the smaller blocks
@@ -170,17 +172,17 @@ public class BulletPhysicsRenderer implements IGameObject {
         return result;
     }
 
-    public BlockRigidBody addTemporaryBlock(Vector3f position, byte type, BLOCK_SIZE size) {
+    public BlockRigidBody addTemporaryBlock(Vector3f position, short type, BLOCK_SIZE size) {
         BlockRigidBody result = addBlock(position, type, size, true);
         return result;
     }
 
-    public BlockRigidBody addTemporaryBlock(Vector3f position, byte type, Vector3f impulse, BLOCK_SIZE size) {
+    public BlockRigidBody addTemporaryBlock(Vector3f position, short type, Vector3f impulse, BLOCK_SIZE size) {
         BlockRigidBody result = addBlock(position, type, impulse, size, true);
         return result;
     }
 
-    public BlockRigidBody addBlock(Vector3f position, byte type, BLOCK_SIZE size, boolean temporary) {
+    public BlockRigidBody addBlock(Vector3f position, short type, BLOCK_SIZE size, boolean temporary) {
         return addBlock(position, type, new Vector3f(0f, 0f, 0f), size, temporary);
     }
 
@@ -193,12 +195,12 @@ public class BulletPhysicsRenderer implements IGameObject {
      * @param size     The size of the block
      * @return The created rigid body (if any)
      */
-    public synchronized BlockRigidBody addBlock(Vector3f position, byte type, Vector3f impulse, BLOCK_SIZE size, boolean temporary) {
+    public synchronized BlockRigidBody addBlock(Vector3f position, short type, Vector3f impulse, BLOCK_SIZE size, boolean temporary) {
         if (temporary && _blocks.size() > MAX_TEMP_BLOCKS)
           removeTemporaryBlocks();
 
         BoxShape shape = _blockShape;
-        Block block = BlockManager.getInstance().getBlock(type);
+        TeraBlock block = TeraSpout.getInstance().getBlock((BlockMaterial) MaterialRegistry.get(type));
         if (block.isTranslucent())
             return null;
         if (size == BLOCK_SIZE.HALF_SIZE)
@@ -310,7 +312,7 @@ public class BulletPhysicsRenderer implements IGameObject {
         for (CollisionObject co : collisionObjects) {
             if (co.getClass().equals(BlockRigidBody.class)) {
                 BlockRigidBody br = (BlockRigidBody) co;
-                Block block = BlockManager.getInstance().getBlock(br.getType());
+                TeraBlock block = TeraSpout.getInstance().getBlock((BlockMaterial) MaterialRegistry.get(br.getType()));
                 Transform t = new Transform();
                 br.getMotionState().getWorldTransform(t);
                 t.getOpenGLMatrix(mFloat);
@@ -394,7 +396,7 @@ public class BulletPhysicsRenderer implements IGameObject {
                     // TODO: Handle full inventories
                     // TODO: Loot blocks should be entities
                     // Block was looted (and reached the player)
-                    Block block = BlockManager.getInstance().getBlock(b.getType());
+                    TeraBlock block = TeraSpout.getInstance().getBlock((BlockMaterial) MaterialRegistry.get(b.getType()));
                     EntityRef blockItem = _blockItemFactory.newInstance(block.getBlockFamily());
                     closestCreature.send(new ReceiveItemEvent(blockItem));
 

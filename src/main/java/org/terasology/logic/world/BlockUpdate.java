@@ -17,7 +17,7 @@
 package org.terasology.logic.world;
 
 import org.terasology.math.Vector3i;
-import org.terasology.model.blocks.Block;
+import org.terasology.teraspout.TeraBlock;
 
 /**
  * A single requested block change.
@@ -27,15 +27,15 @@ import org.terasology.model.blocks.Block;
 public class BlockUpdate {
 
     private Vector3i position;
-    private Block oldType;
-    private Block newType;
+    private TeraBlock oldType;
+    private TeraBlock newType;
 
     /**
      * @param pos     The block position to change
      * @param newType The block type to change it to
      * @param oldType The block type to change it from
      */
-    public BlockUpdate(Vector3i pos, Block newType, Block oldType) {
+    public BlockUpdate(Vector3i pos, TeraBlock newType, TeraBlock oldType) {
         this.position = pos;
         this.oldType = oldType;
         this.newType = newType;
@@ -45,11 +45,11 @@ public class BlockUpdate {
         return position;
     }
 
-    public Block getOldType() {
+    public TeraBlock getOldType() {
         return oldType;
     }
 
-    public Block getNewType() {
+    public TeraBlock getNewType() {
         return newType;
     }
 }

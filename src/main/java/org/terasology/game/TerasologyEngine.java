@@ -58,7 +58,6 @@ import org.terasology.logic.manager.AssetManager;
 import org.terasology.logic.manager.AudioManager;
 import org.terasology.logic.manager.Config;
 import org.terasology.logic.manager.FontManager;
-import org.terasology.logic.manager.GroovyManager;
 import org.terasology.logic.manager.PathManager;
 import org.terasology.logic.manager.ShaderManager;
 import org.terasology.logic.manager.VertexBufferObjectManager;
@@ -283,7 +282,6 @@ public class TerasologyEngine extends SpoutClient {
     }
 
     private void initManagers() {
-        CoreRegistry.put(GroovyManager.class, new GroovyManager());
         AssetManager.getInstance().register(AssetType.MESH, "obj", new ObjMeshLoader());
         AssetManager.getInstance().register(AssetType.MUSIC, "ogg", new OggStreamingSoundLoader());
         AssetManager.getInstance().register(AssetType.SOUND, "ogg", new OggSoundLoader());

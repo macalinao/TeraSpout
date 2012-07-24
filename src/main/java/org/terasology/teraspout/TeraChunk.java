@@ -25,7 +25,6 @@ import org.spout.engine.world.SpoutChunk;
 import org.terasology.logic.manager.Config;
 import org.terasology.math.TeraMath;
 import org.terasology.math.Vector3i;
-import org.terasology.model.blocks.Block;
 import org.terasology.model.structures.AABB;
 import org.terasology.model.structures.TeraSmartArray;
 import org.terasology.rendering.primitives.ChunkMesh;
@@ -138,16 +137,12 @@ public class TeraChunk {
         return handle.getBlockMaterial(x, y, z).getId();
     }
 
-    public Block getBlock(Vector3i pos) {
+    public TeraBlock getBlock(Vector3i pos) {
         return getBlock(pos.x, pos.y, pos.z);
     }
 
-    public Block getBlock(int x, int y, int z) {
-    	org.spout.api.geo.cuboid.Block block = handle.getBlock(x, y, z, null);
-    	if (block == null) {
-    		return null;
-    	}
-    	BlockMaterial mat = block.getMaterial();
+    public TeraBlock getBlock(int x, int y, int z) {
+    	BlockMaterial mat = handle.getBlock(x, y, z, null).getMaterial();
         return TeraSpout.getInstance().getBlock(mat);
     }
 

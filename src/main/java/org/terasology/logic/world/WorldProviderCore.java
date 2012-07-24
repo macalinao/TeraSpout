@@ -16,7 +16,7 @@
 package org.terasology.logic.world;
 
 import org.terasology.math.Vector3i;
-import org.terasology.model.blocks.Block;
+import org.terasology.teraspout.TeraBlock;
 
 /**
  * Provides the basic interface for all world providers.
@@ -91,7 +91,7 @@ public interface WorldProviderCore {
      * @param type The type of the block to set
      * @return True if a block was set/replaced. Will fail of oldType != the current type, or if the underlying chunk is not available
      */
-    public boolean setBlock(int x, int y, int z, Block type, Block oldType);
+    public boolean setBlock(int x, int y, int z, TeraBlock type, TeraBlock oldType);
 
     /**
      * Sets the state at the given position
@@ -123,7 +123,7 @@ public interface WorldProviderCore {
      * @param z The Z-coordinate
      * @return The type of the block
      */
-    public Block getBlock(int x, int y, int z);
+    public TeraBlock getBlock(int x, int y, int z);
 
     /**
      * Returns the light value at the given position.

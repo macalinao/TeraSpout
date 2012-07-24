@@ -8,7 +8,13 @@ import org.terasology.components.ItemComponent;
 import org.terasology.components.world.BlockComponent;
 import org.terasology.components.world.LocationComponent;
 import org.terasology.entityFactory.BlockItemFactory;
-import org.terasology.entitySystem.*;
+import org.terasology.entitySystem.EntityManager;
+import org.terasology.entitySystem.EntityRef;
+import org.terasology.entitySystem.EventHandlerSystem;
+import org.terasology.entitySystem.EventPriority;
+import org.terasology.entitySystem.PrefabManager;
+import org.terasology.entitySystem.ReceiveEvent;
+import org.terasology.entitySystem.RegisterComponentSystem;
 import org.terasology.events.DamageEvent;
 import org.terasology.events.FullHealthEvent;
 import org.terasology.events.NoHealthEvent;
@@ -16,9 +22,8 @@ import org.terasology.events.inventory.ReceiveItemEvent;
 import org.terasology.game.CoreRegistry;
 import org.terasology.logic.manager.AudioManager;
 import org.terasology.logic.world.WorldProvider;
-import org.terasology.model.blocks.Block;
-import org.terasology.model.blocks.management.BlockManager;
 import org.terasology.rendering.physics.BulletPhysicsRenderer;
+import org.terasology.teraspout.TeraBlock;
 
 /**
  * Event handler for events affecting block entities
@@ -47,14 +52,14 @@ public class BlockEntitySystem implements EventHandlerSystem {
     public void onDestroyed(NoHealthEvent event, EntityRef entity) {
         if (worldProvider == null) return;
         BlockComponent blockComp = entity.getComponent(BlockComponent.class);
-        Block oldBlock = worldProvider.getBlock(blockComp.getPosition());
-        worldProvider.setBlock(blockComp.getPosition(), BlockManager.getInstance().getAir(), oldBlock);
+        TeraBlock oldBlock = worldProvider.getBlock(blockComp.getPosition());
+//        worldProvider.setBlock(blockComp.getPosition(), BlockManager.getInstance().getAir(), oldBlock); TODO fixme
 
         // TODO: This should be driven by block attachment info, and not be billboard specific
         // Remove the upper block if it's a billboard
-        Block upperBlock = worldProvider.getBlock(blockComp.getPosition().x, blockComp.getPosition().y + 1, blockComp.getPosition().z);
-        if (upperBlock.getBlockForm() == Block.BLOCK_FORM.BILLBOARD) {
-            worldProvider.setBlock(blockComp.getPosition().x, blockComp.getPosition().y + 1, blockComp.getPosition().z, BlockManager.getInstance().getAir(), upperBlock);
+        TeraBlock upperBlock = worldProvider.getBlock(blockComp.getPosition().x, blockComp.getPosition().y + 1, blockComp.getPosition().z);
+        if (upperBlock.getBlockForm() == TeraBlock.BLOCK_FORM.BILLBOARD) {
+//            worldProvider.setBlock(blockComp.getPosition().x, blockComp.getPosition().y + 1, blockComp.getPosition().z, BlockManager.getInstance().getAir(), upperBlock);
         }
 
         // TODO: Configurable via block definition

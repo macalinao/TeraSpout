@@ -24,9 +24,9 @@ import org.terasology.logic.manager.Config;
 import org.terasology.logic.manager.PostProcessingRenderer;
 import org.terasology.logic.world.WorldProvider;
 import org.terasology.math.TeraMath;
-import org.terasology.model.blocks.Block;
 import org.terasology.rendering.assets.Texture;
 import org.terasology.rendering.world.WorldRenderer;
+import org.terasology.teraspout.TeraBlock;
 
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
@@ -85,7 +85,7 @@ public class ShaderParametersPost implements IShaderParameters {
 
         if (CoreRegistry.get(LocalPlayer.class).isValid()) {
             Vector3d cameraPos = CoreRegistry.get(WorldRenderer.class).getActiveCamera().getPosition();
-            Block block = CoreRegistry.get(WorldProvider.class).getBlock(new Vector3f(cameraPos));
+            TeraBlock block = CoreRegistry.get(WorldProvider.class).getBlock(new Vector3f(cameraPos));
             program.setInt("swimming", block.isLiquid() ? 1 : 0);
         }
     }

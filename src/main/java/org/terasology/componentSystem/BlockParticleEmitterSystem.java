@@ -26,6 +26,8 @@ import javax.vecmath.Vector4f;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.spout.api.material.BlockMaterial;
+import org.spout.api.material.MaterialRegistry;
 import org.terasology.components.BlockParticleEffectComponent;
 import org.terasology.components.BlockParticleEffectComponent.Particle;
 import org.terasology.components.world.LocationComponent;
@@ -36,10 +38,10 @@ import org.terasology.game.CoreRegistry;
 import org.terasology.logic.manager.ShaderManager;
 import org.terasology.logic.world.WorldProvider;
 import org.terasology.math.Side;
-import org.terasology.model.blocks.Block;
-import org.terasology.model.blocks.management.BlockManager;
 import org.terasology.rendering.shader.ShaderProgram;
 import org.terasology.rendering.world.WorldRenderer;
+import org.terasology.teraspout.TeraBlock;
+import org.terasology.teraspout.TeraSpout;
 import org.terasology.utilities.FastRandom;
 
 /**
@@ -49,7 +51,7 @@ import org.terasology.utilities.FastRandom;
 @RegisterComponentSystem(headedOnly = true)
 public class BlockParticleEmitterSystem implements RenderSystem {
     private static final int PARTICLES_PER_UPDATE = 32;
-    private static final float TEX_SIZE = Block.TEXTURE_OFFSET / 4f;
+    private static final float TEX_SIZE = TeraBlock.TEXTURE_OFFSET / 4f;
 
     private EntityManager entityManager;
     private WorldProvider worldProvider;
@@ -63,7 +65,7 @@ public class BlockParticleEmitterSystem implements RenderSystem {
         entityManager = CoreRegistry.get(EntityManager.class);
         worldProvider = CoreRegistry.get(WorldProvider.class);
         worldRenderer = CoreRegistry.get(WorldRenderer.class);
-        displayLists = new TObjectIntHashMap(BlockManager.getInstance().getBlockFamilyCount());
+        displayLists = new TObjectIntHashMap();
     }
 
     @Override
@@ -103,7 +105,7 @@ public class BlockParticleEmitterSystem implements RenderSystem {
         p.velocity.set(particleEffect.initialVelocityRange.x * random.randomFloat(), particleEffect.initialVelocityRange.y * random.randomFloat(), particleEffect.initialVelocityRange.z * random.randomFloat());
         p.size = random.randomPosFloat() * (particleEffect.maxSize - particleEffect.minSize) + particleEffect.minSize;
         p.position.set(particleEffect.spawnRange.x * random.randomFloat(), particleEffect.spawnRange.y * random.randomFloat(), particleEffect.spawnRange.z * random.randomFloat());
-        p.texOffset.set(random.randomPosFloat() * (Block.TEXTURE_OFFSET - TEX_SIZE), random.randomPosFloat() * (Block.TEXTURE_OFFSET - TEX_SIZE));
+        p.texOffset.set(random.randomPosFloat() * (TeraBlock.TEXTURE_OFFSET - TEX_SIZE), random.randomPosFloat() * (TeraBlock.TEXTURE_OFFSET - TEX_SIZE));
         //p.texSize.set(TEX_SIZE,TEX_SIZE);
         particleEffect.particles.add(p);
         particleEffect.spawnCount--;
@@ -188,19 +190,19 @@ public class BlockParticleEmitterSystem implements RenderSystem {
         GL11.glLoadMatrix(model);
     }
 
-    protected void renderParticle(Particle particle, byte blockType, double temperature, double humidity, float light) {
-        int displayList = displayLists.get(BlockManager.getInstance().getBlock(blockType).getBlockFamily());
+    protected void renderParticle(Particle particle, short blockType, double temperature, double humidity, float light) {
+        int displayList = displayLists.get(TeraSpout.getInstance().getBlock((BlockMaterial) MaterialRegistry.get(blockType)).getBlockFamily());
         if (displayList == 0) {
             displayList = glGenLists(1);
             glNewList(displayList, GL11.GL_COMPILE);
             drawParticle(blockType);
             glEndList();
-            displayLists.put(BlockManager.getInstance().getBlock(blockType).getBlockFamily(), displayList);
+            displayLists.put(TeraSpout.getInstance().getBlock((BlockMaterial) MaterialRegistry.get(blockType)).getBlockFamily(), displayList);
         }
 
         ShaderProgram shader = ShaderManager.getInstance().getShaderProgram("particle");
 
-        Vector4f color = BlockManager.getInstance().getBlock(blockType).calcColorOffsetFor(Side.FRONT);
+        Vector4f color = TeraSpout.getInstance().getBlock((BlockMaterial) MaterialRegistry.get(blockType)).calcColorOffsetFor(Side.FRONT);
         shader.setFloat3("colorOffset", color.x, color.y, color.z);
         shader.setFloat("texOffsetX", particle.texOffset.x);
         shader.setFloat("texOffsetY", particle.texOffset.y);
@@ -209,8 +211,8 @@ public class BlockParticleEmitterSystem implements RenderSystem {
         glCallList(displayList);
     }
 
-    private void drawParticle(byte blockType) {
-        Block b = BlockManager.getInstance().getBlock(blockType);
+    private void drawParticle(short blockType) {
+        TeraBlock b = TeraSpout.getInstance().getBlock((BlockMaterial) MaterialRegistry.get(blockType));
 
         glBegin(GL_QUADS);
         GL11.glTexCoord2f(b.calcTextureOffsetFor(Side.FRONT).x, b.calcTextureOffsetFor(Side.FRONT).y);

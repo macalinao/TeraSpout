@@ -29,7 +29,6 @@ import org.terasology.events.input.binds.PauseButton;
 import org.terasology.game.CoreRegistry;
 import org.terasology.input.ButtonState;
 import org.terasology.logic.manager.GUIManager;
-import org.terasology.rendering.gui.menus.UIDebugConsole;
 import org.terasology.rendering.gui.menus.UIHeadsUpDisplay;
 import org.terasology.rendering.gui.menus.UIInventoryScreen;
 import org.terasology.rendering.gui.menus.UIPauseMenu;
@@ -43,11 +42,9 @@ public class MenuControlSystem implements EventHandlerSystem {
 
     public static final String PAUSE_MENU = "engine:pauseMenu";
     public static final String INVENTORY = "engine:inventory";
-    public static final String CONSOLE = "engine:console";
 
     @Override
     public void initialise() {
-        GUIManager.getInstance().addWindow(new UIDebugConsole(), CONSOLE);
         GUIManager.getInstance().addWindow(new UIHeadsUpDisplay(), "engine:hud");
         GUIManager.getInstance().addWindow(new UIInventoryScreen(), INVENTORY);
         GUIManager.getInstance().addWindow(new UIPauseMenu(), PAUSE_MENU);
@@ -55,13 +52,6 @@ public class MenuControlSystem implements EventHandlerSystem {
 
     @Override
     public void shutdown() {
-    }
-
-    @ReceiveEvent(components = LocalPlayerComponent.class)
-    public void onToggleConsole(ConsoleButton event, EntityRef entity) {
-        if (event.getState() == ButtonState.DOWN && GUIManager.getInstance().toggleWindow(CONSOLE)) {
-            event.consume();
-        }
     }
 
     @ReceiveEvent(components = LocalPlayerComponent.class)

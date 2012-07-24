@@ -23,8 +23,8 @@ import org.lwjgl.opengl.GL20;
 import org.newdawn.slick.util.ResourceLoader;
 import org.terasology.logic.manager.Config;
 import org.terasology.logic.manager.ShaderManager;
-import org.terasology.model.blocks.Block;
 import org.terasology.rendering.assets.Shader;
+import org.terasology.teraspout.TeraBlock;
 
 import java.io.BufferedReader;
 import java.io.IOException;

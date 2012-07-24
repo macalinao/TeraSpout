@@ -18,7 +18,7 @@ package org.terasology.model.structures;
 import com.google.common.collect.Lists;
 import org.terasology.logic.world.BlockUpdate;
 import org.terasology.logic.world.WorldProvider;
-import org.terasology.model.blocks.Block;
+import org.terasology.teraspout.TeraBlock;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +40,7 @@ public class BlockCollection {
     /**
      * Map of what blocks are in which positions
      */
-    private final HashMap<BlockPosition, Block> _blocks = new HashMap<BlockPosition, Block>();
+    private final HashMap<BlockPosition, TeraBlock> _blocks = new HashMap<BlockPosition, TeraBlock>();
 
     /**
      * A specific position to use for attaching to a spot in the world - for a tree this could be the bottom trunk block.
@@ -62,7 +62,7 @@ public class BlockCollection {
      * @param pos The position we care about
      * @return The block at the position
      */
-    public Block getBlock(BlockPosition pos) {
+    public TeraBlock getBlock(BlockPosition pos) {
         return _blocks.get(pos);
     }
 
@@ -71,7 +71,7 @@ public class BlockCollection {
      *
      * @return The Position-Block map
      */
-    public HashMap<BlockPosition, Block> getBlocks() {
+    public HashMap<BlockPosition, TeraBlock> getBlocks() {
         return _blocks;
     }
 
@@ -138,7 +138,7 @@ public class BlockCollection {
     public BlockCollection filter(String blockName) {
         BlockCollection filtered = new BlockCollection();
         for (BlockPosition pos : _blocks.keySet()) {
-            Block b = _blocks.get(pos);
+            TeraBlock b = _blocks.get(pos);
             if (b.getTitle().equals(blockName)) {
                 //System.out.println("Block " + b + " matches the filter for " + blockName + " so adding it");
                 filtered.addBlock(pos, b);
@@ -168,7 +168,7 @@ public class BlockCollection {
         return result;
     }
 
-    public void addBlock(BlockPosition pos, Block b) {
+    public void addBlock(BlockPosition pos, TeraBlock b) {
         _blocks.put(pos, b);
     }
 

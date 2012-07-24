@@ -13,32 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.model.blocks;
+package org.terasology.teraspout;
 
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glIsEnabled;
 
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
 import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector4f;
 
 import org.lwjgl.opengl.GL11;
-import org.newdawn.slick.util.ResourceLoader;
+import org.spout.api.material.BlockMaterial;
 import org.terasology.logic.manager.ShaderManager;
 import org.terasology.math.Side;
+import org.terasology.model.blocks.BlockFamily;
 import org.terasology.model.shapes.BlockMeshPart;
 import org.terasology.model.structures.AABB;
 import org.terasology.model.structures.BlockPosition;
@@ -53,7 +48,7 @@ import org.terasology.rendering.shader.ShaderProgram;
  * @author Benjamin Glatzel <benjamin.glatzel@me.com>
  * @author Rasmus 'Cervator' Praestholm <cervator@gmail.com>
  */
-public class Block implements IGameObject {
+public class TeraBlock implements IGameObject {
     public static final int ATLAS_SIZE_IN_PX = 256;
     public static final int TEXTURE_SIZE_IN_PX = 16;
     public static final int ATLAS_ELEMENTS_PER_ROW_AND_COLUMN = ATLAS_SIZE_IN_PX / TEXTURE_SIZE_IN_PX;
@@ -88,9 +83,9 @@ public class Block implements IGameObject {
         DIRECTION_LIT_LEVEL.put(Side.RIGHT, 0.75f);
     }
 
+    private final BlockMaterial handle;
+    
     /* PROPERTIES */
-    private byte _id = 0x0;
-    private String _title = "Untitled block";
     private BlockFamily _family = null;
 
     private boolean _translucent;
@@ -144,9 +139,8 @@ public class Block implements IGameObject {
      * Init. a new block with default properties in place.
      * @param block 
      */
-    public Block() {
-        withTitle("Untitled block");
-
+    public TeraBlock(BlockMaterial mat) {
+    	handle = mat;
         for (Side side : Side.values()) {
             withTextureAtlasPos(side, new Vector2f(0.0f, 0.0f));
             withColorOffset(side, new Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
@@ -248,136 +242,124 @@ public class Block implements IGameObject {
         // Do nothing
     }
 
-
-    // TODO: Change all of these to setters
-    public Block withId(byte id) {
-        _id = id;
-        return this;
-    }
-
-    public Block withTitle(String title) {
-        _title = title;
-        return this;
-    }
-
-    Block withBlockFamily(BlockFamily family) {
+    public TeraBlock withBlockFamily(BlockFamily family) {
         _family = family;
         return this;
     }
 
-    public Block withTranslucent(boolean translucent) {
+    public TeraBlock withTranslucent(boolean translucent) {
         _translucent = translucent;
         return this;
     }
 
-    public Block withTransparent(boolean transparent) {
+    public TeraBlock withTransparent(boolean transparent) {
         _transparent = transparent;
         return this;
     }
 
-    public Block withWaving(boolean waving) {
+    public TeraBlock withWaving(boolean waving) {
         _waving = waving;
         return this;
     }
 
-    public Block withMass(float mass) {
+    public TeraBlock withMass(float mass) {
         _mass = mass;
         return this;
     }
 
-    public Block withInvisible(boolean invisible) {
+    public TeraBlock withInvisible(boolean invisible) {
         _invisible = invisible;
         return this;
     }
 
-    public Block withPenetrable(boolean penetrable) {
+    public TeraBlock withPenetrable(boolean penetrable) {
         _penetrable = penetrable;
         return this;
     }
 
-    public Block withCastsShadows(boolean castsShadows) {
+    public TeraBlock withCastsShadows(boolean castsShadows) {
         _castsShadows = castsShadows;
         return this;
     }
 
-    public Block withRenderBoundingBox(boolean renderBoundingBox) {
+    public TeraBlock withRenderBoundingBox(boolean renderBoundingBox) {
         _renderBoundingBox = renderBoundingBox;
         return this;
     }
 
-    public Block withAllowBlockAttachment(boolean allowBlockAttachment) {
+    public TeraBlock withAllowBlockAttachment(boolean allowBlockAttachment) {
         _allowBlockAttachment = allowBlockAttachment;
         return this;
     }
 
-    public Block withBypassSelectionRay(boolean bypassSelectionRay) {
+    public TeraBlock withBypassSelectionRay(boolean bypassSelectionRay) {
         _bypassSelectionRay = bypassSelectionRay;
         return this;
     }
 
-    public Block withLiquid(boolean liquid) {
+    public TeraBlock withLiquid(boolean liquid) {
         _liquid = liquid;
         return this;
     }
 
-    public Block withBlockForm(BLOCK_FORM blockForm) {
+    public TeraBlock withBlockForm(BLOCK_FORM blockForm) {
         _blockForm = blockForm;
         return this;
     }
 
-    public Block withColorSource(COLOR_SOURCE colorSource) {
+    public TeraBlock withColorSource(COLOR_SOURCE colorSource) {
         _colorSource = colorSource;
         return this;
     }
 
-    public Block withLootAmount(int lootAmount) {
+    public TeraBlock withLootAmount(int lootAmount) {
         _lootAmount = lootAmount;
         return this;
     }
 
-    public Block withLuminance(byte luminance) {
+    public TeraBlock withLuminance(byte luminance) {
         _luminance = luminance;
         return this;
     }
 
-    public Block withHardness(byte hardness) {
+    public TeraBlock withHardness(byte hardness) {
         _hardness = hardness;
         return this;
     }
 
-    public Block withColorOffset(Side side, Vector4f colorOffset) {
+    public TeraBlock withColorOffset(Side side, Vector4f colorOffset) {
         _colorOffset.put(side, colorOffset);
         return this;
     }
 
-    public Block withTextureAtlasPos(Side side, Vector2f atlasPos) {
+    public TeraBlock withTextureAtlasPos(Side side, Vector2f atlasPos) {
         _textureAtlasPos.put(side, atlasPos);
         return this;
     }
 
-    public Block withColorOffset(Vector4f colorOffset) {
+    public TeraBlock withColorOffset(Vector4f colorOffset) {
         for (Side side : Side.values()) {
             withColorOffset(side, colorOffset);
         }
         return this;
     }
 
-    public Block withCenterMesh(BlockMeshPart meshPart) {
+    public TeraBlock withCenterMesh(BlockMeshPart meshPart) {
         _centerMesh = meshPart;
         return this;
     }
 
-    public Block withSideMesh(Side side, BlockMeshPart meshPart) {
+    public TeraBlock withSideMesh(Side side, BlockMeshPart meshPart) {
         _sideMesh.put(side, meshPart);
         return this;
     }
 
-    public Block withLoweredSideMesh(Side side, BlockMeshPart meshPart) {
+    public TeraBlock withLoweredSideMesh(Side side, BlockMeshPart meshPart) {
         _loweredSideMesh.put(side, meshPart);
         return this;
     }
 
-    public Block withFullSide(Side side, boolean full) {
+    public TeraBlock withFullSide(Side side, boolean full) {
     	if (full) {
     		_fullSide.add(side);
     	} else {
@@ -386,7 +368,7 @@ public class Block implements IGameObject {
         return this;
     }
 
-    public Block withAffectedByLut(Side side, boolean full) {
+    public TeraBlock withAffectedByLut(Side side, boolean full) {
     	if (full) {
     		_affectedByLut.add(side);
     	} else {
@@ -395,27 +377,27 @@ public class Block implements IGameObject {
         return this;
     }
 
-    public Block withStraightToInventory(boolean straightToInventory) {
+    public TeraBlock withStraightToInventory(boolean straightToInventory) {
         _straightToInventory = straightToInventory;
         return this;
     }
 
-    public Block withStackable(boolean stackable) {
+    public TeraBlock withStackable(boolean stackable) {
         _stackable = stackable;
         return this;
     }
 
-    public Block withEntityTemporary(boolean entityTemporary) {
+    public TeraBlock withEntityTemporary(boolean entityTemporary) {
         _entityTemporary = entityTemporary;
         return this;
     }
 
-    public Block withEntityPrefab(String entityPrefab) {
+    public TeraBlock withEntityPrefab(String entityPrefab) {
         _entityPrefab = entityPrefab;
         return this;
     }
 
-    public Block withUsable(boolean usable) {
+    public TeraBlock withUsable(boolean usable) {
         _usable = usable;
         return this;
     }
@@ -447,11 +429,11 @@ public class Block implements IGameObject {
     }
 
     public String getTitle() {
-        return _title;
+        return handle.getName();
     }
 
-    public byte getId() {
-        return _id;
+    public short getId() {
+        return handle.getId();
     }
 
     public int getLootAmount() {
@@ -612,8 +594,7 @@ public class Block implements IGameObject {
 
     @Override
     public String toString() {
-        // This may seem excessive in logging, but you get both the class name (which may not be "Block") and block title
-        return this.getClass().getSimpleName() + ":" + _title + ";id:" + _id;
+    	return "TB:" + handle.toString();
     }
 
 }

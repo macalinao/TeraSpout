@@ -17,7 +17,7 @@
 package org.terasology.model.structures;
 
 import org.terasology.logic.world.WorldProvider;
-import org.terasology.model.blocks.Block;
+import org.terasology.teraspout.TeraBlock;
 
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
@@ -104,7 +104,7 @@ public class RayBlockIntersection {
      * @return The list of intersections
      */
     public static ArrayList<Intersection> executeIntersection(WorldProvider w, int x, int y, int z, Vector3d rayOrigin, Vector3d rayDirection) {
-        Block block = w.getBlock(x, y, z);
+        TeraBlock block = w.getBlock(x, y, z);
         /*
          * Ignore invisible blocks.
          */

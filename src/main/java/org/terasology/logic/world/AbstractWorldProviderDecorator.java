@@ -17,7 +17,7 @@
 package org.terasology.logic.world;
 
 import org.terasology.math.Vector3i;
-import org.terasology.model.blocks.Block;
+import org.terasology.teraspout.TeraBlock;
 
 /**
  * @author Immortius
@@ -71,7 +71,7 @@ public class AbstractWorldProviderDecorator implements WorldProviderCore {
     }
 
     @Override
-    public boolean setBlock(int x, int y, int z, Block type, Block oldType) {
+    public boolean setBlock(int x, int y, int z, TeraBlock type, TeraBlock oldType) {
         return base.setBlock(x, y, z, type, oldType);
     }
 
@@ -86,7 +86,7 @@ public class AbstractWorldProviderDecorator implements WorldProviderCore {
     }
 
     @Override
-    public Block getBlock(int x, int y, int z) {
+    public TeraBlock getBlock(int x, int y, int z) {
         return base.getBlock(x, y, z);
     }
 

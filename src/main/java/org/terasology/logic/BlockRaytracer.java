@@ -17,8 +17,8 @@
 package org.terasology.logic;
 
 import org.terasology.logic.world.WorldProvider;
-import org.terasology.model.blocks.Block;
 import org.terasology.model.structures.RayBlockIntersection;
+import org.terasology.teraspout.TeraBlock;
 
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
@@ -46,7 +46,7 @@ public class BlockRaytracer {
                     blockPosY = (int) (pos.y + (pos.y >= 0 ? 0.5f : -0.5f)) + y;
                     blockPosZ = (int) (pos.z + (pos.z >= 0 ? 0.5f : -0.5f)) + z;
 
-                    Block blockType = worldProvider.getBlock(blockPosX, blockPosY, blockPosZ);
+                    TeraBlock blockType = worldProvider.getBlock(blockPosX, blockPosY, blockPosZ);
 
                     // Ignore special blocks
                     if (blockType.isSelectionRayThrough()) {

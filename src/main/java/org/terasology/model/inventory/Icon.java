@@ -2,10 +2,10 @@ package org.terasology.model.inventory;
 
 import org.lwjgl.opengl.GL11;
 import org.terasology.logic.manager.AssetManager;
-import org.terasology.model.blocks.Block;
 import org.terasology.model.blocks.BlockFamily;
 import org.terasology.rendering.assets.Texture;
 import org.terasology.rendering.gui.framework.UIGraphicsElement;
+import org.terasology.teraspout.TeraBlock;
 
 import javax.vecmath.Vector2f;
 import java.util.HashMap;
@@ -304,7 +304,7 @@ public class Icon {
             GL11.glRotatef(-16f, 0f, 1f, 0f);
             glBindTexture(GL11.GL_TEXTURE_2D, terrainTex.getId());
 
-            Block block = _blockFamily.getArchetypeBlock();
+            TeraBlock block = _blockFamily.getArchetypeBlock();
             block.render();
 
             GL11.glPopMatrix();

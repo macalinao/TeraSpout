@@ -16,15 +16,17 @@
 
 package org.terasology.logic.world;
 
+import java.util.logging.Logger;
+
 import org.spout.api.geo.cuboid.Chunk;
+import org.spout.api.material.BlockMaterial;
+import org.spout.api.material.MaterialRegistry;
 import org.terasology.math.Region3i;
 import org.terasology.math.TeraMath;
 import org.terasology.math.Vector3i;
-import org.terasology.model.blocks.Block;
-import org.terasology.model.blocks.management.BlockManager;
+import org.terasology.teraspout.TeraBlock;
 import org.terasology.teraspout.TeraChunk;
-
-import java.util.logging.Logger;
+import org.terasology.teraspout.TeraSpout;
 
 /**
  * @author Immortius
@@ -75,18 +77,18 @@ public class WorldView {
         return chunkRegion;
     }
 
-    public Block getBlock(float x, float y, float z) {
+    public TeraBlock getBlock(float x, float y, float z) {
         return getBlock(TeraMath.floorToInt(x + 0.5f), TeraMath.floorToInt(y + 0.5f), TeraMath.floorToInt(z + 0.5f));
     }
 
-    public Block getBlock(Vector3i pos) {
+    public TeraBlock getBlock(Vector3i pos) {
         return getBlock(pos.x, pos.y, pos.z);
     }
 
     // TODO: Review
-    public Block getBlock(int blockX, int blockY, int blockZ) {
+    public TeraBlock getBlock(int blockX, int blockY, int blockZ) {
         if (!blockRegion.encompasses(blockX, blockY, blockZ)) {
-            return BlockManager.getInstance().getAir();
+            return TeraSpout.getInstance().getBlock((BlockMaterial) MaterialRegistry.get(0));
         }
 
         int chunkIndex = relChunkIndex(blockX, blockY, blockZ);

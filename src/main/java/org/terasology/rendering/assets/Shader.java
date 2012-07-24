@@ -24,10 +24,10 @@ import org.lwjgl.opengl.GL20;
 import org.terasology.asset.Asset;
 import org.terasology.asset.AssetUri;
 import org.terasology.logic.manager.Config;
-import org.terasology.model.blocks.Block;
 import org.terasology.rendering.assets.metadata.ParamMetadata;
 import org.terasology.rendering.assets.metadata.ParamType;
 import org.terasology.rendering.assets.metadata.ShaderMetadata;
+import org.terasology.teraspout.TeraBlock;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  * @author Immortius
  */
 public class Shader implements Asset {
-    private static final String PreProcessorPreamble = "#version 120 \n float TEXTURE_OFFSET = " + Block.TEXTURE_OFFSET + "; \n";
+    private static final String PreProcessorPreamble = "#version 120 \n float TEXTURE_OFFSET = " + TeraBlock.TEXTURE_OFFSET + "; \n";
     private static String IncludedFunctionsVertex = "", IncludedFunctionsFragment = "";
 
     private final AssetUri uri;

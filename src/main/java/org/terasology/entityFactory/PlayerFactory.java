@@ -1,9 +1,17 @@
 package org.terasology.entityFactory;
 
+import javax.vecmath.Vector3f;
+
 import org.terasology.asset.AssetType;
 import org.terasology.asset.AssetUri;
 import org.terasology.audio.Sound;
-import org.terasology.components.*;
+import org.terasology.components.AABBCollisionComponent;
+import org.terasology.components.CharacterMovementComponent;
+import org.terasology.components.CharacterSoundComponent;
+import org.terasology.components.HealthComponent;
+import org.terasology.components.InventoryComponent;
+import org.terasology.components.LocalPlayerComponent;
+import org.terasology.components.PlayerComponent;
 import org.terasology.components.world.LocationComponent;
 import org.terasology.entitySystem.EntityManager;
 import org.terasology.entitySystem.EntityRef;
@@ -11,9 +19,6 @@ import org.terasology.entitySystem.PrefabManager;
 import org.terasology.events.inventory.ReceiveItemEvent;
 import org.terasology.game.CoreRegistry;
 import org.terasology.logic.manager.AssetManager;
-import org.terasology.model.blocks.management.BlockManager;
-
-import javax.vecmath.Vector3f;
 
 /**
  * @author Immortius <immortius@gmail.com>
@@ -56,8 +61,6 @@ public class PlayerFactory {
         player.addComponent(new LocalPlayerComponent());
         player.addComponent(new InventoryComponent(36));
 
-        player.send(new ReceiveItemEvent(blockFactory.newInstance(BlockManager.getInstance().getBlockFamily("Companion"), 16)));
-        player.send(new ReceiveItemEvent(blockFactory.newInstance(BlockManager.getInstance().getBlockFamily("Torch"), 99)));
         player.send(new ReceiveItemEvent(entityManager.create("core:axe")));
         player.send(new ReceiveItemEvent(entityManager.create("core:pickaxe")));
         player.send(new ReceiveItemEvent(entityManager.create("core:explodeTool")));

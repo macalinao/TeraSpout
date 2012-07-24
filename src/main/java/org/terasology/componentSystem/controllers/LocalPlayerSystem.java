@@ -44,9 +44,9 @@ import org.terasology.logic.world.BlockEntityRegistry;
 import org.terasology.logic.world.WorldProvider;
 import org.terasology.math.TeraMath;
 import org.terasology.math.Vector3i;
-import org.terasology.model.blocks.Block;
 import org.terasology.model.structures.RayBlockIntersection;
 import org.terasology.rendering.cameras.DefaultCamera;
+import org.terasology.teraspout.TeraBlock;
 
 import com.bulletphysics.linearmath.QuaternionUtil;
 
@@ -151,7 +151,7 @@ public class LocalPlayerSystem implements RenderSystem, EventHandlerSystem {
         if (Config.getInstance().isPlacingBox()) {
             RayBlockIntersection.Intersection selectedBlock = calcSelectedBlock();
             if (selectedBlock != null) {
-                Block block = worldProvider.getBlock(selectedBlock.getBlockPosition());
+                TeraBlock block = worldProvider.getBlock(selectedBlock.getBlockPosition());
                 if (block.isRenderBoundingBox()) {
                     block.getBounds(selectedBlock.getBlockPosition()).render(2f);
                 }
@@ -262,7 +262,7 @@ public class LocalPlayerSystem implements RenderSystem, EventHandlerSystem {
 
             BlockComponent blockComp = target.getComponent(BlockComponent.class);
             if (blockComp != null) {
-                Block block = worldProvider.getBlock(blockComp.getPosition());
+                TeraBlock block = worldProvider.getBlock(blockComp.getPosition());
                 if (item.getPerBlockDamageBonus().containsKey(block.getBlockFamily().getTitle())) {
                     damage += item.getPerBlockDamageBonus().get(block.getBlockFamily().getTitle());
                 }
@@ -370,7 +370,7 @@ public class LocalPlayerSystem implements RenderSystem, EventHandlerSystem {
                     blockPosY = (int) (pos.y + (pos.y >= 0 ? 0.5f : -0.5f)) + y;
                     blockPosZ = (int) (pos.z + (pos.z >= 0 ? 0.5f : -0.5f)) + z;
 
-                    Block block = worldProvider.getBlock(blockPosX, blockPosY, blockPosZ);
+                    TeraBlock block = worldProvider.getBlock(blockPosX, blockPosY, blockPosZ);
 
                     // Ignore special blocks
                     if (block.isSelectionRayThrough()) {

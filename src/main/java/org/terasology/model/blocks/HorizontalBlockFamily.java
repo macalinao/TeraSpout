@@ -1,6 +1,7 @@
 package org.terasology.model.blocks;
 
 import org.terasology.math.Side;
+import org.terasology.teraspout.TeraBlock;
 
 import java.util.EnumMap;
 
@@ -12,16 +13,16 @@ import java.util.EnumMap;
 public class HorizontalBlockFamily implements BlockFamily {
 
     String _name;
-    EnumMap<Side, Block> _blocks = new EnumMap<Side, Block>(Side.class);
+    EnumMap<Side, TeraBlock> _blocks = new EnumMap<Side, TeraBlock>(Side.class);
 
     /**
      * @param name   The name for the block group.
      * @param blocks The set of blocks that make up the group. Front, Back, Left and Right must be provided - the rest is ignored.
      */
-    public HorizontalBlockFamily(String name, EnumMap<Side, Block> blocks) {
+    public HorizontalBlockFamily(String name, EnumMap<Side, TeraBlock> blocks) {
         _name = name;
         for (Side side : Side.horizontalSides()) {
-            Block block = blocks.get(side);
+            TeraBlock block = blocks.get(side);
             if (block == null) {
                 throw new IllegalArgumentException("Missing block for side: " + side.toString());
             }
@@ -34,11 +35,11 @@ public class HorizontalBlockFamily implements BlockFamily {
         return _name;
     }
 
-    public byte getBlockIdFor(Side attachmentSide, Side direction) {
+    public short getBlockIdFor(Side attachmentSide, Side direction) {
         return getBlockFor(attachmentSide, direction).getId();
     }
 
-    public Block getBlockFor(Side attachmentSide, Side direction) {
+    public TeraBlock getBlockFor(Side attachmentSide, Side direction) {
         if (attachmentSide.isHorizontal()) {
             return _blocks.get(attachmentSide);
         }
@@ -46,7 +47,7 @@ public class HorizontalBlockFamily implements BlockFamily {
 
     }
 
-    public Block getArchetypeBlock() {
+    public TeraBlock getArchetypeBlock() {
         return _blocks.get(Side.FRONT);
     }
 }

@@ -31,7 +31,7 @@ import org.terasology.entitySystem.event.RemovedComponentEvent;
 import org.terasology.events.BlockChangedEvent;
 import org.terasology.game.CoreRegistry;
 import org.terasology.math.Vector3i;
-import org.terasology.model.blocks.Block;
+import org.terasology.teraspout.TeraBlock;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -83,7 +83,7 @@ public class EntityAwareWorldProvider extends AbstractWorldProviderDecorator imp
     }
 
     @Override
-    public boolean setBlock(int x, int y, int z, Block type, Block oldType) {
+    public boolean setBlock(int x, int y, int z, TeraBlock type, TeraBlock oldType) {
         if (super.setBlock(x, y, z, type, oldType)) {
             if (Thread.currentThread().equals(mainThread)) {
                 getOrCreateEntityAt(new Vector3i(x, y, z)).send(new BlockChangedEvent(new Vector3i(x, y, z), type, oldType));
@@ -105,7 +105,7 @@ public class EntityAwareWorldProvider extends AbstractWorldProviderDecorator imp
     public EntityRef getOrCreateEntityAt(Vector3i blockPosition) {
         EntityRef blockEntity = blockComponentLookup.get(blockPosition);
         if (blockEntity == null || !blockEntity.exists()) {
-            Block block = getBlock(blockPosition.x, blockPosition.y, blockPosition.z);
+            TeraBlock block = getBlock(blockPosition.x, blockPosition.y, blockPosition.z);
             if (block.getId() == 0)
                 return EntityRef.NULL;
 
