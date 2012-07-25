@@ -48,7 +48,7 @@ import org.terasology.rendering.shader.ShaderProgram;
  * @author Benjamin Glatzel <benjamin.glatzel@me.com>
  * @author Rasmus 'Cervator' Praestholm <cervator@gmail.com>
  */
-public class TeraBlock implements IGameObject {
+public class TeraBlock {
     public static final int ATLAS_SIZE_IN_PX = 256;
     public static final int TEXTURE_SIZE_IN_PX = 16;
     public static final int ATLAS_ELEMENTS_PER_ROW_AND_COLUMN = ATLAS_SIZE_IN_PX / TEXTURE_SIZE_IN_PX;
@@ -232,14 +232,8 @@ public class TeraBlock implements IGameObject {
         }
     }
 
-    @Override
     public void render() {
         renderWithLightValue(1.0f);
-    }
-
-    @Override
-    public void update(float delta) {
-        // Do nothing
     }
 
     public TeraBlock withBlockFamily(BlockFamily family) {
